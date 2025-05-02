@@ -2,6 +2,7 @@ class World {
   character = new Character();
   enemies = [new Chicken(), new Chicken(), new Chicken()];
   clouds = [new Cloud()];
+  
   backgroundObjects = [
     new BackgroundObject('img/5_background/layers/air.png', 0),
     new BackgroundObject('img/5_background/layers/3_third_layer/1.png', 0),
@@ -10,6 +11,7 @@ class World {
   ];
   canvas;
   ctx;
+  
 
   // constructor ist eine spezielle Methode, die aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird. In diesem Fall wird der Konstruktor verwendet, um das Canvas-Element zu initialisieren und die draw-Methode aufzurufen.
   constructor(canvas) {
@@ -42,7 +44,8 @@ class World {
   }
 
   addToMap(mo){
-    this.ctx.drawImage(mo.img, mo.x, mo.y, mo.heigth, mo.width);
+    this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.heigth);
+
   }
 
 }
