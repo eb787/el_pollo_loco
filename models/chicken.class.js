@@ -25,10 +25,7 @@ class Chicken extends MovableObject{
     animate() {
         this.moveLeft(); // Start moving the cloud to the left
         setInterval(() => {
-          let i = this.currentImage % this.IMAGES_WALKING.length; // let i = 0 % 6 => 0, Rest 0
-          let path = this.IMAGES_WALKING[i];
-          this.img = this.imageCache[path];
-          this.currentImage++;
+          this.playAnimation(this.IMAGES_WALKING); // Play the walking animation
         }, 200); 
       }
 
