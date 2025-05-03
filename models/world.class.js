@@ -24,10 +24,12 @@ setWorld() {
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // clear the canvas before drawing
     this.ctx.translate(this.camera_x, 0); // translate the canvas to the left by camera_x pixels
-    this.addObjectsToMap(this.level.backgroundObjects);//addObjectsToMap ist eine Methode, die ein Array von Objekten auf die Karte hinzufügt. Sie wird verwendet, um die Bilder der Hintergrundobjekte an den Positionen x und y zu zeichnen. Die Höhe und Breite der Bilder werden ebenfalls angegeben.
-    this.addToMap(this.character);//addToMap ist eine Methode, die ein Objekt auf die Karte hinzufügt. Sie wird verwendet, um das Bild des Charakters an der Position x und y zu zeichnen. Die Höhe und Breite des Bildes werden ebenfalls angegeben.
+    this.addObjectsToMap(this.level.backgroundObjects);
+    this.addToMap(this.character);
     this.addObjectsToMap(this.level.clouds);
     this.addObjectsToMap(this.level.enemies);
+    this.addObjectsToMap(this.level.coins);
+    this.addObjectsToMap(this.level.salsa);
     this.ctx.translate(-this.camera_x, 0); // reset the translation to the original position
     
 
