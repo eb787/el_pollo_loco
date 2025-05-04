@@ -13,7 +13,9 @@ heigth = 500;
     }
 
     animate() {
-       this.moveLeft(); // Start moving the cloud to the left
+        setInterval(() => {
+            this.moveLeft();
+          }, 1000 / 60); // Start moving the cloud to the left
     }
 
 }

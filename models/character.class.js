@@ -12,34 +12,61 @@ class Character extends MovableObject {
     "img/2_character_pepe/2_walk/W-25.png",
     "img/2_character_pepe/2_walk/W-26.png",
   ];
+
+  IMAGES_JUMPING = [
+    "img/2_character_pepe/3_jump/J-31.png",
+    "img/2_character_pepe/3_jump/J-32.png",
+    "img/2_character_pepe/3_jump/J-33.png",
+    "img/2_character_pepe/3_jump/J-34.png",
+    "img/2_character_pepe/3_jump/J-35.png",
+    "img/2_character_pepe/3_jump/J-36.png",
+    "img/2_character_pepe/3_jump/J-37.png",
+    "img/2_character_pepe/3_jump/J-38.png",
+    "img/2_character_pepe/3_jump/J-39.png",
+  ];
   world;
 
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
     this.loadImages(this.IMAGES_WALKING);
+    this.loadImages(this.IMAGES_JUMPING);
+    this.applyGravity(); // Apply gravity to the character
     this.animate();
   }
 
   animate() {
+
     setInterval(() => {
       if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-        this.x += this.speed; // Move the character to the right
-        this.otherDirection = false; // Set the direction to right
+       this.moveRight();
+       this.otherDirection = false;
       }
       if (this.world.keyboard.LEFT && this.x > 0) {
-        this.x -= this.speed; // Move the character to the left
-        this.otherDirection = true; // Set the direction to left
+        this.moveLeft();
+        this.otherDirection = true; 
       }
-      this.world.camera_x = -this.x +100; // Update the camera position based on the character's position
+      if (this.world.keyboard.SPACE && !this.isAboveGround()) {
+      this.jump();
+      }
+
+
+
+      this.world.camera_x = -this.x + 100; // Update the camera position based on the character's position
     }, 1000 / 60); // 60 frames per second
 
     setInterval(() => {
-      if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-        // Start moving the character to the right
-       this.playAnimation(this.IMAGES_WALKING); // Play the walking animation
+      if (this.isAboveGround()) {
+        this.playAnimation(this.IMAGES_JUMPING);
+      } else {
+
+        if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+          this.playAnimation(this.IMAGES_WALKING); 
+        }
       }
     }, 50); // 10 frames per second
   }
 
-  jump() {}
+  jump() {
+    this.speedY = 30;
+  }
 }
