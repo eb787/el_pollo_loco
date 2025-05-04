@@ -38,16 +38,28 @@ class MovableObject {
     });
   }
 
-  draw(ctx){
+  draw(ctx) {
     ctx.drawImage(this.img, this.x, this.y, this.width, this.heigth);
   }
 
   drawFrame(ctx) {
-    ctx.beginPath();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "blue";
-    ctx.rect(this.x, this.y, this.width, this.heigth);
-    ctx.stroke();
+    if (this instanceof Character || this instanceof Chicken) {
+      ctx.beginPath();
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = "blue";
+      ctx.rect(this.x, this.y, this.width, this.heigth);
+      ctx.stroke();
+    }
+  }
+
+  //
+  isColliding(mo) {
+    return (
+      this.x + this.width > mo.x &&
+      this.y + this.heigth > mo.y &&
+      this.x < mo.x + mo.width &&
+      this.y < mo.y + mo.heigth
+    );
   }
 
   playAnimation(images) {
@@ -58,11 +70,11 @@ class MovableObject {
   }
 
   moveRight() {
-    this.x += this.speed;   
+    this.x += this.speed;
   }
 
   moveLeft() {
-    this.x -= this.speed; 
+    this.x -= this.speed;
   }
 
   jump() {

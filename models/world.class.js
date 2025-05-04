@@ -12,11 +12,22 @@ class World {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
     this.draw();
-    this.setWorld(); // setWorld ist eine Methode, die aufgerufen wird, um die Welt zu initialisieren. Sie wird verwendet, um die Hintergrundobjekte und den Charakter zu zeichnen.
+    this.setWorld();
+    this.checkCollisions();
   }
 
   setWorld() {
     this.character.world = this; // this.character.world ist eine Eigenschaft des Charakters, die auf die Welt verweist. Sie wird verwendet, um den Charakter mit der Welt zu verbinden.
+  }
+
+  checkCollisions() {
+    setInterval(() => {
+      this.level.enemies.forEach((enemy) => {
+        if (this.character.isColliding(enemy)) {
+          console.log("Collision detected!");
+        }
+      });
+    }, 200);
   }
 
   draw() {
@@ -29,7 +40,6 @@ class World {
     this.addObjectsToMap(this.level.coins);
     this.addObjectsToMap(this.level.salsa);
     this.ctx.translate(-this.camera_x, 0); // reset the translation to the original position
-
     // draw wird so oft aufgerufen, wie es der Browser kann. requestAnimationFrame ist eine Methode, die den Browser auffordert, eine Animation zu zeichnen. Es wird empfohlen, diese Methode zu verwenden, um die Leistung zu optimieren und die Animation flüssiger zu gestalten.
     let self = this;
     requestAnimationFrame(function () {
@@ -43,7 +53,6 @@ class World {
     });
   }
 
-
   addToMap(mo) {
     if (mo.otherDirection) {
       this.flipImage(mo);
@@ -55,19 +64,16 @@ class World {
     if (mo.otherDirection) {
       this.flipImageBack(mo);
     }
-  
-    
   }
 
   flipImage(mo) {
     this.ctx.save();
-    this.ctx.scale(-1, 1); 
-    mo.x = -mo.x - mo.width; 
+    this.ctx.scale(-1, 1);
+    mo.x = -mo.x - mo.width;
   }
 
-  flipImageBack(mo){
-    mo.x = -mo.x - mo.width; 
-    this.ctx.restore(); 
+  flipImageBack(mo) {
+    mo.x = -mo.x - mo.width;
+    this.ctx.restore();
   }
-
 }
