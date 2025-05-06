@@ -46,7 +46,7 @@ const level1 = new Level(
     new Coins(1400, 170),
     new Coins(1500, 140),
     new Coins(1200, 170),
-    new Coins(1300, 140),
+    new Coins(1300, 140)
   ],
 
   [
@@ -54,6 +54,6 @@ const level1 = new Level(
     new Salsa(700, 300),
     new Salsa(1200, 300),
     new Salsa(1800, 300),
-    new Salsa(2300, 300),
+    new Salsa(2300, 300)
   ]
 );
