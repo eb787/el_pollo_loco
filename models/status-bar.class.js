@@ -9,7 +9,7 @@ class StatusBar extends DrawableObject{
   ];
   
   percentage = 100;
- 
+  
 
   constructor() {
     super();
@@ -43,7 +43,5 @@ class StatusBar extends DrawableObject{
             return 0;
         }
     }
-
-    
         
 }

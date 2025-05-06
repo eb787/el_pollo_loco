@@ -6,6 +6,9 @@ class World {
   keyboard;
   camera_x = 0;
   statusBar = new StatusBar();
+  coinStatusBar = new CoinStatusBar();
+  salsaStatusBar = new SalsaStatusBar();
+ 
 
   // constructor ist eine spezielle Methode, die aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird. In diesem Fall wird der Konstruktor verwendet, um das Canvas-Element zu initialisieren und die draw-Methode aufzurufen.
   constructor(canvas, keyboard) {
@@ -44,6 +47,10 @@ class World {
     this.addObjectsToMap(this.level.salsa);
     this.ctx.translate(-this.camera_x, 0); // reset the translation to the original position
     this.addToMap(this.statusBar);
+    this.addToMap(this.coinStatusBar);
+    this.addToMap(this.salsaStatusBar);
+    
+   
 
     let self = this;
     requestAnimationFrame(function () {
