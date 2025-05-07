@@ -8,7 +8,6 @@ class World {
   statusBar = new StatusBar();
   coinStatusBar = new CoinStatusBar();
   salsaStatusBar = new SalsaStatusBar();
- 
 
   // constructor ist eine spezielle Methode, die aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird. In diesem Fall wird der Konstruktor verwendet, um das Canvas-Element zu initialisieren und die draw-Methode aufzurufen.
   constructor(canvas, keyboard) {
@@ -32,8 +31,23 @@ class World {
           this.statusBar.setPercentage(this.character.energy);
         }
       });
+
+      this.level.coins.forEach((coin, index) => {
+        if (this.character.isColliding(coin)) {
+          this.character.collectCoin();
+          this.level.coins.splice(index, 1);
+          this.coinStatusBar.setPercentage(this.character.coins * 20);
+        }
+      });
+
+      this.level.salsa.forEach((salsa, index) => {
+        if (this.character.isColliding(salsa)) {
+          this.character.collectSalsa();
+          this.level.salsa.splice(index, 1);
+          this.salsaStatusBar.setPercentage(this.character.salsa * 20);
+        }
+      });
     }, 200);
-    
   }
 
   draw() {
@@ -49,8 +63,6 @@ class World {
     this.addToMap(this.statusBar);
     this.addToMap(this.coinStatusBar);
     this.addToMap(this.salsaStatusBar);
-    
-   
 
     let self = this;
     requestAnimationFrame(function () {

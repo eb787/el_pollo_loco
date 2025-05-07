@@ -4,6 +4,8 @@ class MovableObject extends DrawableObject {
   speedY = 0;
   acceleration = 2.5; // Acceleration due to gravity
   energy = 100;
+  coins = 0;
+  salsa = 0;
   lastHit = 0;
 
   applyGravity() {
@@ -26,6 +28,14 @@ class MovableObject extends DrawableObject {
       this.x < mo.x + mo.width &&
       this.y < mo.y + mo.heigth
     );
+  }
+
+  collectCoin() { 
+    this.coins += 1;
+  }
+  
+  collectSalsa(){
+    this.salsa += 1;
   }
 
   hit() {
