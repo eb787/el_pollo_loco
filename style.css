@@ -2,9 +2,12 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-image: url("img/wüste.jpg");
+    justify-content: center;
+    background-image: url("img/desert-sunset.jpg");
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
 }
 
 h1 {

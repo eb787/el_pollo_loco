@@ -8,6 +8,7 @@ class World {
   statusBar = new StatusBar();
   coinStatusBar = new CoinStatusBar();
   salsaStatusBar = new SalsaStatusBar();
+  throwableObjects = [];
 
   // constructor ist eine spezielle Methode, die aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird. In diesem Fall wird der Konstruktor verwendet, um das Canvas-Element zu initialisieren und die draw-Methode aufzurufen.
   constructor(canvas, keyboard) {
@@ -16,38 +17,50 @@ class World {
     this.canvas = canvas;
     this.draw();
     this.setWorld();
-    this.checkCollisions();
+    this.run();
   }
 
   setWorld() {
     this.character.world = this; // this.character.world ist eine Eigenschaft des Charakters, die auf die Welt verweist. Sie wird verwendet, um den Charakter mit der Welt zu verbinden.
   }
 
-  checkCollisions() {
+  run() {
     setInterval(() => {
-      this.level.enemies.forEach((enemy) => {
-        if (this.character.isColliding(enemy)) {
-          this.character.hit();
-          this.statusBar.setPercentage(this.character.energy);
-        }
-      });
-
-      this.level.coins.forEach((coin, index) => {
-        if (this.character.isColliding(coin)) {
-          this.character.collectCoin();
-          this.level.coins.splice(index, 1);
-          this.coinStatusBar.setPercentage(this.character.coins * 20);
-        }
-      });
-
-      this.level.salsa.forEach((salsa, index) => {
-        if (this.character.isColliding(salsa)) {
-          this.character.collectSalsa();
-          this.level.salsa.splice(index, 1);
-          this.salsaStatusBar.setPercentage(this.character.salsa * 20);
-        }
-      });
+     this.checkCollisions();
+     this.checkThrowObjects();
     }, 200);
+  }
+
+  checkThrowObjects(){
+    if(this.keyboard.D){
+      let bottle = new ThrowableObject(this.character.x +100, this.character.y + 100);
+      this.throwableObjects.push(bottle);
+    }
+  }
+
+  checkCollisions() {
+    this.level.enemies.forEach((enemy) => {
+      if (this.character.isColliding(enemy)) {
+        this.character.hit();
+        this.statusBar.setPercentage(this.character.energy);
+      }
+    });
+
+    this.level.coins.forEach((coin, index) => {
+      if (this.character.isColliding(coin)) {
+        this.character.collectCoin();
+        this.level.coins.splice(index, 1);
+        this.coinStatusBar.setPercentage(this.character.coins * 20);
+      }
+    });
+
+    this.level.salsa.forEach((salsa, index) => {
+      if (this.character.isColliding(salsa)) {
+        this.character.collectSalsa();
+        this.level.salsa.splice(index, 1);
+        this.salsaStatusBar.setPercentage(this.character.salsa * 20);
+      }
+    });
   }
 
   draw() {
@@ -57,6 +70,7 @@ class World {
     this.addToMap(this.character);
     this.addObjectsToMap(this.level.clouds);
     this.addObjectsToMap(this.level.enemies);
+    this.addObjectsToMap(this.throwableObjects);
     this.addObjectsToMap(this.level.coins);
     this.addObjectsToMap(this.level.salsa);
     this.ctx.translate(-this.camera_x, 0); // reset the translation to the original position

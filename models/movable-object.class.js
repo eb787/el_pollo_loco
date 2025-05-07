@@ -18,7 +18,11 @@ class MovableObject extends DrawableObject {
   }
 
   isAboveGround() {
-    return this.y < 180;
+    if (this instanceof ThrowableObject) { //ThrowableObjects should be always falling
+      return true;
+    } else {
+      return this.y < 180;
+    }
   }
 
   isColliding(mo) {
@@ -30,11 +34,11 @@ class MovableObject extends DrawableObject {
     );
   }
 
-  collectCoin() { 
+  collectCoin() {
     this.coins += 1;
   }
-  
-  collectSalsa(){
+
+  collectSalsa() {
     this.salsa += 1;
   }
 
