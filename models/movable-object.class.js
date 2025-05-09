@@ -61,13 +61,6 @@ class MovableObject extends DrawableObject {
     return this.energy == 0;
   }
 
-  playAnimation(images) {
-    let i = this.currentImage % images.length; // let i = 0 % 6 => 0, Rest 0
-    let path = images[i];
-    this.img = this.imageCache[path];
-    this.currentImage++;
-  }
-
   moveRight() {
     this.x += this.speed;
   }
@@ -79,4 +72,12 @@ class MovableObject extends DrawableObject {
   jump() {
     this.speedY = 30;
   }
+
+   playAnimation(images) {
+    let i = this.currentImage % images.length; // let i = 0 % 6 => 0, Rest 0
+    let path = images[i];
+    this.img = this.imageCache[path];
+    this.currentImage++;
+  }
+
 }

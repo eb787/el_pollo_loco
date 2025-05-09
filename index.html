@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El pollo loco</title>
+    <link rel="icon" type="image/x-icon" href="./img/4_enemie_boss_chicken/2_alert/G10.png">
+    <title>El Pollo Loco</title>
     <link rel="stylesheet" href="style.css">
     <script src="models/drawable-object.class.js"></script>
-    <script src="models/movable-object.class.js"></script> 
+    <script src="models/movable-object.class.js"></script>
     <script src="models/character.class.js"></script>
     <script src="models/chicken.class.js"></script>
     <script src="models/smallChicken.js"></script>
@@ -24,11 +26,23 @@
     <script src="models/throwable-oject.class.js"></script>
     <script src="levels/level1.js"></script>
     <script src="js/game.js"></script>
-    
+
 </head>
+
 <body onload="init()">
-    <h1> El pollo loco</h1>
-    <canvas id="canvas"   height="480" width="720"></canvas>
+    <h1> El Pollo Loco</h1>
+    <div id="fullscreen" class="fullscreen">
+        <canvas id="canvas" height="480" width="720"></canvas>
+        <div class="position_divs">
+        <button class="fullscreen-btn" onclick="toggleFullscreen()">🔲 Fullscreen</button>
+        <div class="div_rules"> arrow = rigth</div>
+        <div class="div_rules"> arrow = left</div>
+        <div class="div_rules">space = jump</div>
+        <div class="div_rules"> d = throw</div>
+        </div>
+    </div>
+
 
 </body>
+
 </html>

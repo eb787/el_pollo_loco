@@ -10,7 +10,8 @@ class World {
   salsaStatusBar = new SalsaStatusBar();
   throwableObjects = [];
 
-  // constructor ist eine spezielle Methode, die aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird. In diesem Fall wird der Konstruktor verwendet, um das Canvas-Element zu initialisieren und die draw-Methode aufzurufen.
+  // constructor ist eine spezielle Methode, die aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird. 
+  // //In diesem Fall wird der Konstruktor verwendet, um das Canvas-Element zu initialisieren und die draw-Methode aufzurufen.
   constructor(canvas, keyboard) {
     this.keyboard = keyboard;
     this.ctx = canvas.getContext("2d");
@@ -31,13 +32,17 @@ class World {
     }, 200);
   }
 
-  checkThrowObjects(){
-    if(this.keyboard.D){
-      let bottle = new ThrowableObject(this.character.x +100, this.character.y + 100);
+
+
+  checkThrowObjects() {
+    if (this.keyboard.D && this.character.salsa > 0) {
+      let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
       this.throwableObjects.push(bottle);
+      this.character.salsa--;
+      this.salsaStatusBar.setPercentage(this.character.salsa * 20); 
     }
   }
-
+  
   checkCollisions() {
     this.level.enemies.forEach((enemy) => {
       if (this.character.isColliding(enemy)) {

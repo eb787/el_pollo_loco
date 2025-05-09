@@ -8,14 +8,85 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     height: 100vh;
+    margin: 0;
+    font-family: 'pacifico', Arial, Helvetica, sans-serif;
 }
 
+@font-face {
+    font-family: 'pacifico';
+    src: url('fonts/Pacifico-Regular.ttf') format('woff'),
+}  
+
 h1 {
-    font-size: 64px;
+    font-size: 72px;
+    letter-spacing: 3px;
+    text-shadow: 10px 4px 8px rgb(0,0,0,0.8);
+    color: rgba(2, 49, 150, 0.910);
 }
 
 canvas {
     background-color: black;
-   
+    display: block;
 }
 
+.fullscreen{
+    display: flex;
+    flex-direction: column;
+}
+
+.position_divs{
+    display: flex;
+}
+
+.div_rules{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+     padding: 10px 20px;
+    width: 144px;
+    font-size: 16px;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #ffcc00;
+    color: #000;
+    border: 2px solid #000;
+    border-radius: 10px;
+    box-shadow: 3px 3px 0px #000;
+    z-index: 1000;
+}
+
+.fullscreen-btn {
+    padding: 10px 20px;
+    width: 144px;
+    font-size: 16px;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #ffcc00;
+    color: #000;
+    border: 2px solid #000;
+    border-radius: 10px; 
+    box-shadow: 3px 3px 0px #000;
+    transition: all 0.2s ease;
+    z-index: 1000;
+}
+
+.fullscreen-btn:hover {
+    background-color: #ffe066;
+    box-shadow: 1px 1px 0px #000;
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+
+@media only screen and (max-width: 760px) {
+    canvas {
+        width: 100%;
+    }
+    h1 {
+        display: none;
+    }
+}
+
+@media only screen and (max-height: 480px) {
+    canvas {
+        height: 100vh;
+    }
+}
