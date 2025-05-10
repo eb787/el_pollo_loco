@@ -32,8 +32,6 @@ class World {
     }, 200);
   }
 
-
-
   checkThrowObjects() {
     if (this.keyboard.D && this.character.salsa > 0) {
       let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);

@@ -14,7 +14,7 @@ class SalsaStatusBar extends DrawableObject{
             this.x = 20; 
             this.y = 90;
             this.width = 200;
-            this.heigth = 60;
+            this.height = 60;
             this.setPercentage(0);
         }
 

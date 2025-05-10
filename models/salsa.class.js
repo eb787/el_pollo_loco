@@ -1,21 +1,24 @@
 class Salsa extends MovableObject {
-    width = 80;
-    
-     IMAGES_SALSA = [
-        "img/6_salsa_bottle/1_salsa_bottle_on_ground.png",
-        "img/6_salsa_bottle/2_salsa_bottle_on_ground.png",
-    ];
+  y = 350;
+  width = 50;
+  height = 80;
+  IMAGES_SALSA = [
+    "img/6_salsa_bottle/1_salsa_bottle_on_ground.png",
+    "img/6_salsa_bottle/2_salsa_bottle_on_ground.png",
+  ];
+  offset = {
+    top: 10,
+    left: 10,
+    right: 15,
+    bottom: 10,
+  };
 
-    constructor(x, y) {
-        super();
-        this.loadImages(this.IMAGES_SALSA);
-        this.x = x;
-        this.y = y;
-       
-        
-    
-        const imageIndex = Math.floor(Math.random() * this.IMAGES_SALSA.length);
-        this.loadImage(this.IMAGES_SALSA[imageIndex]);
-    }
-    
+  constructor(x) {
+    super();
+    this.loadImages(this.IMAGES_SALSA);
+    this.x = x;
+
+    const imageIndex = Math.floor(Math.random() * this.IMAGES_SALSA.length);
+    this.loadImage(this.IMAGES_SALSA[imageIndex]);
+  }
 }

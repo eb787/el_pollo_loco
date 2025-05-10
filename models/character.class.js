@@ -1,8 +1,10 @@
 class Character extends MovableObject {
-  heigth = 250;
-  width = 165;
+  width = 135;
+  height = 250;
   y = 180;
   speed = 10;
+
+
   IMAGES_WALKING = [
     "img/2_character_pepe/2_walk/W-21.png",
     "img/2_character_pepe/2_walk/W-22.png",
@@ -68,6 +70,12 @@ class Character extends MovableObject {
   world;
   lastMoveTime = Date.now();
   idleDuration = 0;
+    offset = {
+  top: 100,
+  left: 15,
+  right: 20 ,
+  bottom: 10
+};
 
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
@@ -128,7 +136,7 @@ class Character extends MovableObject {
           }
         }
       }
-    }, 50);
+    }, 80);
   }
 
   jump() {

@@ -9,7 +9,7 @@ body {
     background-repeat: no-repeat;
     height: 100vh;
     margin: 0;
-    font-family: 'pacifico', Arial, Helvetica, sans-serif;
+    font-family: 'Comic Sans MS', Arial, Helvetica, sans-serif;
 }
 
 @font-face {
@@ -36,6 +36,7 @@ canvas {
 
 .position_divs{
     display: flex;
+    padding-top: 5px;
 }
 
 .div_rules{
