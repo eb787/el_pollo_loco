@@ -5,8 +5,11 @@ class ThrowableObject extends MovableObject {
     right: 10,
     bottom: 10,
   };
+  
+
   constructor(x, y) {
-    super().loadImage("img/6_salsa_bottle/salsa_bottle.png");
+    super(); 
+    this.loadImage("img/6_salsa_bottle/salsa_bottle.png"); 
     this.height = 60;
     this.width = 70;
     this.x = x;
@@ -23,3 +26,4 @@ class ThrowableObject extends MovableObject {
     }, 25);
   }
 }
+

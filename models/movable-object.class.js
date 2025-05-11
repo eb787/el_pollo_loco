@@ -3,7 +3,6 @@ class MovableObject extends DrawableObject {
   otherDirection = false;
   speedY = 0;
   acceleration = 2.5; // Acceleration due to gravity
-  energy = 100;
   coins = 0;
   salsa = 0;
   lastHit = 0;
@@ -31,7 +30,7 @@ class MovableObject extends DrawableObject {
     }
   }
 
-isColliding(mo) {
+ isColliding(mo) {
   return (
     this.x + this.width - this.offset.right > mo.x + mo.offset.left &&
     this.y + this.height - this.offset.bottom > mo.y + mo.offset.top &&
@@ -39,7 +38,6 @@ isColliding(mo) {
     this.y + this.offset.top < mo.y + mo.height - mo.offset.bottom
   );
 }
-
 
   collectCoin() {
     this.coins += 1;
@@ -63,6 +61,7 @@ isColliding(mo) {
     timepassed = timepassed / 1000; // difference between now and the last hit
     return timepassed < 1;
   }
+
 
   isDead() {
     return this.energy == 0;

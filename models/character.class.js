@@ -3,6 +3,7 @@ class Character extends MovableObject {
   height = 250;
   y = 180;
   speed = 10;
+  energy = 100;
 
 
   IMAGES_WALKING = [
@@ -84,7 +85,6 @@ class Character extends MovableObject {
     this.loadImages(this.IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_IDLE);
-    this.loadImages(this.IMAGES_IDLE);
     this.loadImages(this.IMAGES_LONG_IDLE);
     this.applyGravity(); 
     this.animate();
@@ -96,22 +96,18 @@ class Character extends MovableObject {
         this.moveRight();
         this.otherDirection = false;
         this.lastMoveTime = Date.now();
-        this.idleDuration = 0; 
       }
       if (this.world.keyboard.LEFT && this.x > 0) {
         this.moveLeft();
         this.otherDirection = true;
         this.lastMoveTime = Date.now(); 
-        this.idleDuration = 0; 
       }
       if (this.world.keyboard.SPACE && !this.isAboveGround()) {
         this.jump();
         this.lastMoveTime = Date.now(); 
-        this.idleDuration = 0; 
       }
        if (this.world.keyboard.D) {
         this.lastMoveTime = Date.now(); 
-        this.idleDuration = 0; 
       }
 
       this.world.camera_x = -this.x + 200;

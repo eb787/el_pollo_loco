@@ -1,5 +1,6 @@
 class World {
   character = new Character();
+  endboss = new Endboss();
   level = level1;
   canvas;
   ctx;
@@ -8,9 +9,10 @@ class World {
   statusBar = new StatusBar();
   coinStatusBar = new CoinStatusBar();
   salsaStatusBar = new SalsaStatusBar();
+  endbossStatusBar = new EndbossStatusBar();
   throwableObjects = [];
 
-  // constructor ist eine spezielle Methode, die aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird. 
+  // constructor ist eine spezielle Methode, die aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird.
   // //In diesem Fall wird der Konstruktor verwendet, um das Canvas-Element zu initialisieren und die draw-Methode aufzurufen.
   constructor(canvas, keyboard) {
     this.keyboard = keyboard;
@@ -27,20 +29,23 @@ class World {
 
   run() {
     setInterval(() => {
-     this.checkCollisions();
-     this.checkThrowObjects();
+      this.checkCollisions();
+      this.checkThrowObjects();
     }, 200);
   }
 
   checkThrowObjects() {
     if (this.keyboard.D && this.character.salsa > 0) {
-      let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+      let bottle = new ThrowableObject(
+        this.character.x + 100,
+        this.character.y + 100
+      );
       this.throwableObjects.push(bottle);
       this.character.salsa--;
-      this.salsaStatusBar.setPercentage(this.character.salsa * 20); 
+      this.salsaStatusBar.setPercentage(this.character.salsa * 20);
     }
   }
-  
+
   checkCollisions() {
     this.level.enemies.forEach((enemy) => {
       if (this.character.isColliding(enemy)) {
@@ -48,6 +53,15 @@ class World {
         this.statusBar.setPercentage(this.character.energy);
       }
     });
+
+   this.throwableObjects.forEach((bottle, index) => {
+  if (this.endboss.isColliding(bottle)) {
+    this.endboss.hit();
+    this.endbossStatusBar.setPercentage(this.endboss.energy);
+    this.throwableObjects.splice(index, 1); 
+  }
+});
+
 
     this.level.coins.forEach((coin, index) => {
       if (this.character.isColliding(coin)) {
@@ -80,6 +94,7 @@ class World {
     this.addToMap(this.statusBar);
     this.addToMap(this.coinStatusBar);
     this.addToMap(this.salsaStatusBar);
+    this.addToMap(this.endbossStatusBar);
 
     let self = this;
     requestAnimationFrame(function () {
