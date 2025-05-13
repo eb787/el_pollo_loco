@@ -6,6 +6,7 @@ class MovableObject extends DrawableObject {
   coins = 0;
   salsa = 0;
   lastHit = 0;
+  lastHitBottle = 0;
   offset = {
     top: 20,
     left: 20,
@@ -30,6 +31,7 @@ class MovableObject extends DrawableObject {
     }
   }
 
+ 
  isColliding(mo) {
   return (
     this.x + this.width - this.offset.right > mo.x + mo.offset.left &&
@@ -38,6 +40,12 @@ class MovableObject extends DrawableObject {
     this.y + this.offset.top < mo.y + mo.height - mo.offset.bottom
   );
 }
+
+die() {
+  this.speed = 0;
+  this.dead = true;
+}
+
 
   collectCoin() {
     this.coins += 1;
@@ -53,15 +61,41 @@ class MovableObject extends DrawableObject {
       this.energy = 0;
     } else {
       this.lastHit = new Date().getTime();
+      this.lastHitBottle = new Date().getTime();
     }
   }
 
-  isHurt() {
+   isHurt() {
     let timepassed = new Date().getTime() - this.lastHit; //difference between now and the last hit
     timepassed = timepassed / 1000; // difference between now and the last hit
     return timepassed < 1;
   }
 
+
+
+hitByBottle() {
+  this.energy -= 20;
+  if (this.energy < 0) {
+    this.energy = 0;
+  }
+  this.bossIsHurt = true;
+  this.lastHitBottle = new Date().getTime();
+}
+
+
+isHurtByBottle() {
+  let timepassed = new Date().getTime() - this.lastHitBottle;
+  timepassed = timepassed / 1000;
+  return timepassed < 1;
+}
+
+
+     playAnimation(images) {
+    let i = this.currentImage % images.length; // let i = 0 % 6 => 0, Rest 0
+    let path = images[i];
+    this.img = this.imageCache[path];
+    this.currentImage++;
+  }
 
   isDead() {
     return this.energy == 0;
@@ -76,14 +110,7 @@ class MovableObject extends DrawableObject {
   }
 
   jump() {
-    this.speedY = 30;
-  }
-
-   playAnimation(images) {
-    let i = this.currentImage % images.length; // let i = 0 % 6 => 0, Rest 0
-    let path = images[i];
-    this.img = this.imageCache[path];
-    this.currentImage++;
+    this.speedY = 25;
   }
 
 }

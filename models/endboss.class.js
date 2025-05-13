@@ -2,9 +2,7 @@ class Endboss extends MovableObject {
   height = 450;
   width = 280;
   y = 5;
-  energy = 25;
- 
-
+  energy = 100;
 
   IMAGES_ALERT = [
     "img/4_enemie_boss_chicken/2_alert/G5.png",
@@ -42,39 +40,33 @@ class Endboss extends MovableObject {
     "img/4_enemie_boss_chicken/5_dead/G25.png",
     "img/4_enemie_boss_chicken/5_dead/G26.png",
   ];
-   world;
+  world;
   offset = {
     top: 80,
     left: 10,
     right: 10,
     bottom: 10,
   };
- 
 
   constructor() {
     super().loadImage("img/4_enemie_boss_chicken/2_alert/G5.png");
-    this.loadImages(this.IMAGES_ALERT);
-    this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_DEAD);
+    this.loadImages(this.IMAGES_HURT);
+    this.loadImages(this.IMAGES_ALERT);
     this.x = 2400;
     this.animate();
-
+    
   }
 
-animate() {
-  setInterval(() => {
-    if (this.isDead()) {
-      this.playAnimation(this.IMAGES_DEAD);
-    } else if (this.isHurt()) {
-      console.log("HURT wird abgespielt");
-      this.playAnimation(this.IMAGES_HURT);
-    } else {
-      this.playAnimation(this.IMAGES_ALERT);
-    }
-  }, 100); // statt 300ms – flüssiger!
-}
-
-
-
-
+  animate() {
+    setInterval(() => {
+      if (this.isDead()) {
+        this.playAnimation(this.IMAGES_DEAD);
+      } else if (this.isHurtByBottle()) {
+        this.playAnimation(this.IMAGES_HURT);
+      } else {
+        this.playAnimation(this.IMAGES_ALERT);
+      }
+    }, 200);
+  }
 }

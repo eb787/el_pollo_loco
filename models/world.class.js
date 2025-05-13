@@ -1,6 +1,5 @@
 class World {
   character = new Character();
-  endboss = new Endboss();
   level = level1;
   canvas;
   ctx;
@@ -23,15 +22,15 @@ class World {
     this.run();
   }
 
-  setWorld() {
-    this.character.world = this; // this.character.world ist eine Eigenschaft des Charakters, die auf die Welt verweist. Sie wird verwendet, um den Charakter mit der Welt zu verbinden.
-  }
-
   run() {
     setInterval(() => {
-      this.checkCollisions();
       this.checkThrowObjects();
-    }, 200);
+      this.checkCollisions();
+    }, 100);
+  }
+
+  setWorld() {
+    this.character.world = this; // this.character.world ist eine Eigenschaft des Charakters, die auf die Welt verweist. Sie wird verwendet, um den Charakter mit der Welt zu verbinden.
   }
 
   checkThrowObjects() {
@@ -47,21 +46,13 @@ class World {
   }
 
   checkCollisions() {
-    this.level.enemies.forEach((enemy) => {
-      if (this.character.isColliding(enemy)) {
-        this.character.hit();
-        this.statusBar.setPercentage(this.character.energy);
+    this.throwableObjects.forEach((bottle, index) => {
+      if (world.level.enemies[3].isColliding(bottle)) {
+        world.level.enemies[3].hitByBottle();
+        this.endbossStatusBar.setPercentage(world.level.enemies[3].energy);
+        this.throwableObjects.splice(index, 1);
       }
     });
-
-   this.throwableObjects.forEach((bottle, index) => {
-  if (this.endboss.isColliding(bottle)) {
-    this.endboss.hit();
-    this.endbossStatusBar.setPercentage(this.endboss.energy);
-    this.throwableObjects.splice(index, 1); 
-  }
-});
-
 
     this.level.coins.forEach((coin, index) => {
       if (this.character.isColliding(coin)) {
@@ -78,6 +69,30 @@ class World {
         this.salsaStatusBar.setPercentage(this.character.salsa * 20);
       }
     });
+
+    for (let enemy of this.level.enemies) {
+      if (enemy.dead) continue;
+
+      if (this.character.isColliding(enemy)) {
+        let isChicken = enemy instanceof Chicken || enemy instanceof SmallChicken;
+
+        if (isChicken) {
+          let characterBottom = this.character.y + this.character.height;
+          let enemyTop = enemy.y;
+          let isFalling = this.character.speedY < 0;
+
+          if (
+            isFalling && characterBottom > enemyTop && characterBottom < enemyTop + enemy.height
+          ) {
+            enemy.die();
+            this.character.speedY = 25;
+            continue;
+          }
+          this.character.hit();
+          this.statusBar.setPercentage(this.character.energy);
+        }
+      }
+    }
   }
 
   draw() {
