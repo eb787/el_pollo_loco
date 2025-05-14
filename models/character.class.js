@@ -4,8 +4,6 @@ class Character extends MovableObject {
   y = 180;
   speed = 10;
   energy = 100;
-
-
   IMAGES_WALKING = [
     "img/2_character_pepe/2_walk/W-21.png",
     "img/2_character_pepe/2_walk/W-22.png",
@@ -71,6 +69,8 @@ class Character extends MovableObject {
   world;
   lastMoveTime = Date.now();
   idleDuration = 0;
+  lastThrowTime = 0; 
+  throwCooldown = 700; 
     offset = {
   top: 100,
   left: 15,
@@ -109,7 +109,6 @@ class Character extends MovableObject {
        if (this.world.keyboard.D) {
         this.lastMoveTime = Date.now(); 
       }
-
       this.world.camera_x = -this.x + 200;
     }, 1000 / 60);
 
@@ -125,7 +124,7 @@ class Character extends MovableObject {
           this.playAnimation(this.IMAGES_WALKING);
         } else {
           this.idleDuration = Date.now() - this.lastMoveTime;
-          if (this.idleDuration > 3000) {
+          if (this.idleDuration > 5000) {
             this.playAnimation(this.IMAGES_LONG_IDLE);
           } else {
             this.playAnimation(this.IMAGES_IDLE);

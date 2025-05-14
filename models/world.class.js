@@ -10,6 +10,7 @@ class World {
   salsaStatusBar = new SalsaStatusBar();
   endbossStatusBar = new EndbossStatusBar();
   throwableObjects = [];
+ 
 
   // constructor ist eine spezielle Methode, die aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird.
   // //In diesem Fall wird der Konstruktor verwendet, um das Canvas-Element zu initialisieren und die draw-Methode aufzurufen.
@@ -34,10 +35,23 @@ class World {
   }
 
   checkThrowObjects() {
-    if (this.keyboard.D && this.character.salsa > 0) {
+    let now = Date.now();
+    if (
+      this.keyboard.D &&
+      this.character.salsa > 0 &&
+      now - this.character.lastThrowTime > this.character.throwCooldown
+    ) {
+      this.character.lastThrowTime = now;
+
+      let bottleX = this.character.otherDirection
+        ? this.character.x - 30
+        : this.character.x + this.character.width;
+
+      let bottleY = this.character.y + 100;
       let bottle = new ThrowableObject(
-        this.character.x + 100,
-        this.character.y + 100
+        bottleX,
+        bottleY,
+        this.character.otherDirection
       );
       this.throwableObjects.push(bottle);
       this.character.salsa--;
@@ -46,13 +60,16 @@ class World {
   }
 
   checkCollisions() {
-    this.throwableObjects.forEach((bottle, index) => {
-      if (world.level.enemies[3].isColliding(bottle)) {
+    this.throwableObjects.forEach((bottle) => {
+      if (!bottle.broken && world.level.enemies[3].isColliding(bottle)) {
         world.level.enemies[3].hitByBottle();
         this.endbossStatusBar.setPercentage(world.level.enemies[3].energy);
-        this.throwableObjects.splice(index, 1);
+        bottle.startSplash();
       }
     });
+    this.throwableObjects = this.throwableObjects.filter(
+      (obj) => !obj.markedForRemoval
+    );
 
     this.level.coins.forEach((coin, index) => {
       if (this.character.isColliding(coin)) {
@@ -74,7 +91,8 @@ class World {
       if (enemy.dead) continue;
 
       if (this.character.isColliding(enemy)) {
-        let isChicken = enemy instanceof Chicken || enemy instanceof SmallChicken;
+        let isChicken =
+          enemy instanceof Chicken || enemy instanceof SmallChicken;
 
         if (isChicken) {
           let characterBottom = this.character.y + this.character.height;
@@ -82,7 +100,9 @@ class World {
           let isFalling = this.character.speedY < 0;
 
           if (
-            isFalling && characterBottom > enemyTop && characterBottom < enemyTop + enemy.height
+            isFalling &&
+            characterBottom > enemyTop &&
+            characterBottom < enemyTop + enemy.height
           ) {
             enemy.die();
             this.character.speedY = 25;

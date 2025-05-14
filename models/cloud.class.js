@@ -1,21 +1,44 @@
-class Cloud extends MovableObject{
-y = -20;
-width = 450;
-heigth = 500;
+class Cloud extends MovableObject {
+  width = 450;
+  height = 500;
 
+  IMAGES_CLOUDS = [
+    "img/5_background/layers/4_clouds/1.png",
+    "img/5_background/layers/4_clouds/2.png"
+  ];
 
+  currentImageIndex = 0;
 
-    constructor(){
-        super().loadImage('img/5_background/layers/4_clouds/1.png')
+  constructor() {
+    super();
+    this.imageCache = {}; 
+    this.loadImages(this.IMAGES_CLOUDS);
 
-        this.x = Math.random() * 300; // Random x position between 200 and 700  
-        this.animate();    
-    }
+    this.x = 100 + Math.random() * 3200;
+     this.y = -25;
+    this.speed = 0.3 + Math.random() * 0.5;
 
-    animate() {
-        setInterval(() => {
-            this.moveLeft();
-          }, 1000 / 60); // Start moving the cloud to the left
-    }
+    this.setRandomImage(); 
+    this.animate();
+  }
 
+  setRandomImage() {
+    this.currentImageIndex = (this.currentImageIndex + 1) % this.IMAGES_CLOUDS.length;
+    let path = this.IMAGES_CLOUDS[this.currentImageIndex];
+    this.img = this.imageCache[path];
+  }
+
+  animate() {
+    setInterval(() => {
+      this.moveLeft();
+
+      if (this.x + this.width < 0) {
+        this.x = 3000 + Math.random();
+        this.y = -25;
+
+        this.setRandomImage();
+      }
+    }, 1000 / 60);
+  }
 }
+

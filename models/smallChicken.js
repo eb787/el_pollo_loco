@@ -16,40 +16,54 @@ class SmallChicken extends MovableObject {
     right: 5,
     bottom: 5,
   };
-   dead = false;
+  dead = false;
+  static smallChickens = []; 
 
   constructor() {
     super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
     this.loadImages(this.IMAGES_WALKING);
 
-    this.x = 450 + Math.random() * 500;
-    this.speed = 0.15 + Math.random() * 0.55;
+    this.x = this.getRandomPosition(); 
+    this.speed = 0.15 + Math.random() * 0.45;
+    SmallChicken.smallChickens.push(this);  
     this.animate();
   }
 
-   die() {
-    this.dead = true;  
-    super.die(); 
+  getRandomPosition() {
+    let xPosition;
+    let isValid = false;
+
+    while (!isValid) {
+      xPosition = 450 + Math.random() * 1000; 
+      isValid = true;
+      for (let smallChicken of SmallChicken.smallChickens) {
+        if (Math.abs(smallChicken.x - xPosition) < this.width) {
+          isValid = false;  
+          break;
+        }
+      }
+    }
+    return xPosition;
+  }
+
+  die() {
+    this.dead = true;
+    super.die();
     this.loadImage(this.IMAGES_DEAD[0]);
   }
 
-  
-animate() {
-  setInterval(() => {
-    if (!this.dead) {
-      this.moveLeft();
-    }
-  }, 1000 / 60);
+  animate() {
+    setInterval(() => {
+      if (!this.dead) {
+        this.moveLeft();
+      }
+    }, 1000 / 60);
 
-  setInterval(() => {
-    if (this.dead) {
-      // Nur Standbild, kein Animationwechsel nötig
-    } else {
-      this.playAnimation(this.IMAGES_WALKING);
-    }
-  }, 200);
+    setInterval(() => {
+      if (this.dead) {
+      } else {
+        this.playAnimation(this.IMAGES_WALKING);
+      }
+    }, 200);
+  }
 }
-}
-
-
- 

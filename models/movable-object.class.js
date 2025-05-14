@@ -71,8 +71,6 @@ die() {
     return timepassed < 1;
   }
 
-
-
 hitByBottle() {
   this.energy -= 20;
   if (this.energy < 0) {
