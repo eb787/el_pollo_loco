@@ -40,8 +40,6 @@ class Endboss extends MovableObject {
     "img/4_enemie_boss_chicken/5_dead/G25.png",
     "img/4_enemie_boss_chicken/5_dead/G26.png",
   ];
-
-
   world;
   offset = {
     top: 80,
@@ -55,7 +53,6 @@ class Endboss extends MovableObject {
     this.loadImages(this.IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_ALERT);
-    
     this.x = 2400;
     this.animate();
   }

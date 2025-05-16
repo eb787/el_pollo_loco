@@ -10,7 +10,7 @@ class World {
   salsaStatusBar = new SalsaStatusBar();
   endbossStatusBar = new EndbossStatusBar();
   throwableObjects = [];
-  isGameOver = false; // Flag, um zu überprüfen, ob das Spiel vorbei ist.
+  isGameOver = false; 
 
   constructor(canvas, keyboard) {
     this.intervalIds = [];
@@ -20,7 +20,7 @@ class World {
     this.setWorld();
     this.checkIfPlayerWon();
     this.checkIfPlayerWon();
-    this.checkIfPlayerLost(); // ✅ Jetzt wird auch das Verloren-Szenario geprüft
+    this.checkIfPlayerLost(); 
 
     this.draw();
     this.run();
@@ -117,8 +117,7 @@ class World {
   }
 
   draw() {
-    if (this.isGameOver) return; // Stoppe die Zeichnung, wenn das Spiel zu Ende ist.
-
+    if (this.isGameOver) return; 
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.translate(this.camera_x, 0);
     this.addObjectsToMap(this.level.backgroundObjects);
@@ -202,7 +201,6 @@ class World {
   this.intervalIds.push(interval);
 }
 
-
   showWinScreen() {
     let winImage = new Image();
     winImage.src = "img/You won, you lost/You won A.png";
@@ -212,6 +210,8 @@ class World {
       ctx.drawImage(winImage, 0, 0, canvas.width, canvas.height);
     };
     this.stopGame(); // Pausiert das Spiel.
+    this.showRestartButton();
+
   }
 
   showLoseScreen() {
@@ -223,11 +223,21 @@ class World {
     ctx.drawImage(loseImage, 0, 0, canvas.width, canvas.height);
   };
   this.stopGame();
+  this.showRestartButton();
+
 }
 
-
   stopGame() {
-    this.clearAllIntervals(); // Stoppe alle Intervalle.
-    this.isGameOver = true;  // Setze das Spiel als vorbei.
+    this.clearAllIntervals(); 
+    this.isGameOver = true;  
   }
+
+  showRestartButton() {
+  const btn = document.getElementById('restartBtn');
+  btn.style.display = 'block';
+  btn.onclick = () => {
+    location.reload();
+  };
+}
+
 }

@@ -31,9 +31,9 @@
 </head>
 
 <body onload="init()">
-    <h1> El Pollo Loco</h1>
     <div id="fullscreen" class="fullscreen">
         <canvas id="canvas" height="480" width="720"></canvas>
+        
         <div class="position_divs">
         <button class="fullscreen-btn" onclick="toggleFullscreen()">🔲 Fullscreen</button>
         <div class="div_rules"> arrow = rigth</div>
@@ -41,8 +41,9 @@
         <div class="div_rules">space = jump</div>
         <div class="div_rules"> d = throw</div>
         </div>
+        
     </div>
-    
+     <button id="restartBtn" class="restartBtn" style="display: none;">Spiel neu starten</button>
      <a class="div-impressum" href="impressum.html">Impressum</a>
 
 </body>

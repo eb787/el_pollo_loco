@@ -9,7 +9,7 @@ body {
     background-repeat: no-repeat;
     height: 100vh;
     margin: 0;
-    font-family: 'Comic Sans MS', Arial, Helvetica, sans-serif;
+    font-family: 'Comic Sans MS', 'Pacifico', Helvetica, sans-serif;
 }
 
 @font-face {
@@ -46,7 +46,6 @@ canvas {
     padding: 10px 20px;
     width: 144px;
     font-size: 16px;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
     background-color: #ffcc00;
     color: #000;
     border: 2px solid #000;
@@ -59,7 +58,6 @@ canvas {
     padding: 10px 20px;
     width: 144px;
     font-size: 16px;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
     background-color: #ffcc00;
     color: #000;
     border: 2px solid #000;
@@ -77,9 +75,11 @@ canvas {
 }
 
 .div-impressum {
-    display: flex;
-    justify-content: center;
-    padding: 12px;
+    position: absolute;
+    bottom: 10px;
+    text-decoration: none;
+    color: #000;
+    padding: 14px;
     background-color: #928a8a;
     border-radius: 12px;
     text-align: center;
@@ -87,11 +87,37 @@ canvas {
     margin-top: 30px;
 }
 
-@media (max-width: 910px){
-.position_divs {
+.div-impressum:hover {
+    cursor: pointer;
+    box-shadow: 1px 1px 0px #000;
+    transform: scale(1.05);
+}
+
+.restartBtn {
+    display: flex;
+    justify-content: center;
+    padding: 14px;
+    background-color: #fd8700;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 20px;
+    margin-top: 20px;
+    font-family: 'Comic Sans MS', 'Pacifico', Helvetica, sans-serif;
+}
+
+.restartBtn:hover {
+    cursor: pointer;
+    box-shadow: 1px 1px 0px #000;
+    transform: scale(1.05);
+}
+
+
+@media (max-width: 910px) {
+    .position_divs {
         display: none;
     }
 }
+
 @media only screen and (max-width: 760px) {
     canvas {
         width: 100%;
