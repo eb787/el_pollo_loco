@@ -10,28 +10,34 @@ class World {
   salsaStatusBar = new SalsaStatusBar();
   endbossStatusBar = new EndbossStatusBar();
   throwableObjects = [];
- 
+  isGameOver = false; // Flag, um zu überprüfen, ob das Spiel vorbei ist.
 
-  // constructor ist eine spezielle Methode, die aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird.
-  // //In diesem Fall wird der Konstruktor verwendet, um das Canvas-Element zu initialisieren und die draw-Methode aufzurufen.
   constructor(canvas, keyboard) {
+    this.intervalIds = [];
     this.keyboard = keyboard;
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
-    this.draw();
     this.setWorld();
+    this.checkIfPlayerWon();
+    this.checkIfPlayerWon();
+    this.checkIfPlayerLost(); // ✅ Jetzt wird auch das Verloren-Szenario geprüft
+
+    this.draw();
     this.run();
   }
 
   run() {
-    setInterval(() => {
-      this.checkThrowObjects();
-      this.checkCollisions();
-    }, 100);
+    if (!this.isGameOver) {
+      setInterval(() => {
+        this.checkThrowObjects();
+        this.checkCollisions();
+        this.checkIfPlayerWon();
+      }, 100);
+    }
   }
 
   setWorld() {
-    this.character.world = this; // this.character.world ist eine Eigenschaft des Charakters, die auf die Welt verweist. Sie wird verwendet, um den Charakter mit der Welt zu verbinden.
+    this.character.world = this;
   }
 
   checkThrowObjects() {
@@ -42,11 +48,9 @@ class World {
       now - this.character.lastThrowTime > this.character.throwCooldown
     ) {
       this.character.lastThrowTime = now;
-
       let bottleX = this.character.otherDirection
         ? this.character.x - 30
         : this.character.x + this.character.width;
-
       let bottleY = this.character.y + 100;
       let bottle = new ThrowableObject(
         bottleX,
@@ -89,16 +93,13 @@ class World {
 
     for (let enemy of this.level.enemies) {
       if (enemy.dead) continue;
-
       if (this.character.isColliding(enemy)) {
         let isChicken =
           enemy instanceof Chicken || enemy instanceof SmallChicken;
-
         if (isChicken) {
           let characterBottom = this.character.y + this.character.height;
           let enemyTop = enemy.y;
           let isFalling = this.character.speedY < 0;
-
           if (
             isFalling &&
             characterBottom > enemyTop &&
@@ -116,8 +117,10 @@ class World {
   }
 
   draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // clear the canvas before drawing
-    this.ctx.translate(this.camera_x, 0); // translate the canvas to the left by camera_x pixels
+    if (this.isGameOver) return; // Stoppe die Zeichnung, wenn das Spiel zu Ende ist.
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.translate(this.camera_x, 0);
     this.addObjectsToMap(this.level.backgroundObjects);
     this.addToMap(this.character);
     this.addObjectsToMap(this.level.clouds);
@@ -125,7 +128,7 @@ class World {
     this.addObjectsToMap(this.throwableObjects);
     this.addObjectsToMap(this.level.coins);
     this.addObjectsToMap(this.level.salsa);
-    this.ctx.translate(-this.camera_x, 0); // reset the translation to the original position
+    this.ctx.translate(-this.camera_x, 0);
     this.addToMap(this.statusBar);
     this.addToMap(this.coinStatusBar);
     this.addToMap(this.salsaStatusBar);
@@ -165,5 +168,66 @@ class World {
   flipImageBack(mo) {
     mo.x = -mo.x - mo.width;
     this.ctx.restore();
+  }
+
+  setSafeInterval(fn, time) {
+    let id = setInterval(fn, time);
+    this.intervalIds.push(id);
+    return id;
+  }
+
+  clearAllIntervals() {
+    this.intervalIds.forEach(clearInterval);
+    this.intervalIds = [];
+  }
+
+  checkIfPlayerWon() {
+    let interval = setInterval(() => {
+      let endboss = this.level.enemies.find(e => e instanceof Endboss);
+      if (endboss && endboss.energy <= 0) {
+        clearInterval(interval);
+        this.showWinScreen();
+      }
+    }, 200);
+    this.intervalIds.push(interval);
+  }
+
+  checkIfPlayerLost() {
+  let interval = setInterval(() => {
+    if (this.character.energy <= 0) {
+      clearInterval(interval);
+      this.showLoseScreen();
+    }
+  }, 200);
+  this.intervalIds.push(interval);
+}
+
+
+  showWinScreen() {
+    let winImage = new Image();
+    winImage.src = "img/You won, you lost/You won A.png";
+    winImage.onload = () => {
+      let ctx = this.ctx;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(winImage, 0, 0, canvas.width, canvas.height);
+    };
+    this.stopGame(); // Pausiert das Spiel.
+  }
+
+  showLoseScreen() {
+  let loseImage = new Image();
+  loseImage.src = "img/You won, you lost/You lost.png";
+  loseImage.onload = () => {
+    let ctx = this.ctx;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(loseImage, 0, 0, canvas.width, canvas.height);
+  };
+  this.stopGame();
+}
+
+
+  stopGame() {
+    this.clearAllIntervals(); // Stoppe alle Intervalle.
+    this.isGameOver = true;  // Setze das Spiel als vorbei.
   }
 }

@@ -15,36 +15,32 @@ class Chicken extends MovableObject {
     bottom: 5,
   };
   dead = false;
-  static chickens = [];  // Statische Liste, die alle Hühner speichert
+  static chickens = []; 
 
   constructor() {
     super().loadImage("img/3_enemies_chicken/chicken_normal/1_walk/1_w.png");
     this.loadImages(this.IMAGES_WALKING);
 
-    this.x = this.getRandomPosition();  // Zufällige Position holen
+    this.x = this.getRandomPosition();  
     this.speed = 0.15 + Math.random() * 0.35;
-    Chicken.chickens.push(this);  // Das Huhn zur Liste der Hühner hinzufügen
+    Chicken.chickens.push(this);  
     this.animate();
   }
 
-  // Methode, um eine zufällige Position zu berechnen, die nicht zu nah an anderen Hühnern ist
+
   getRandomPosition() {
     let xPosition;
     let isValid = false;
-
     while (!isValid) {
-      xPosition = 1100 + Math.random() * 800;  // Zufällige Position im Bereich
+      xPosition = 1100 + Math.random() * 800;  
       isValid = true;
-
-      // Überprüfen, ob das neue Huhn zu nah an einem anderen ist
       for (let chicken of Chicken.chickens) {
         if (Math.abs(chicken.x - xPosition) < this.width) {
-          isValid = false;  // Wenn zu nah, nochmal versuchen
+          isValid = false;  
           break;
         }
       }
     }
-
     return xPosition;
   }
 

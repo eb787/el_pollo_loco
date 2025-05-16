@@ -13,7 +13,6 @@ class DrawableObject {
     bottom: 0,
   };
 
-
   loadImage(path) {
     this.img = new Image();
     this.img.src = path;
@@ -27,13 +26,13 @@ class DrawableObject {
     });
   }
 
-draw(ctx) {
-  try {
-    ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-  } catch (e) {
-    console.warn("Fehler beim Zeichnen eines Objekts:", e);
+  draw(ctx) {
+    try {
+      ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+    } catch (e) {
+      console.warn("Fehler beim Zeichnen eines Objekts:", e);
+    }
   }
-}
 
   drawFrame(ctx) {
     if (
