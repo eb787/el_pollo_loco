@@ -195,7 +195,7 @@ class Character extends MovableObject {
 
   jump() {
     this.speedY = 25;
-    let jumpSound = new Audio("audio/jump.mp3");
+    let jumpSound = new Audio("audio/character_jump.mp3");
     jumpSound.volume = 0.5;
     jumpSound.play().catch((e) => console.warn("Jump sound blockiert:", e));
   }
