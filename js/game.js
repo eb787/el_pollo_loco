@@ -5,6 +5,7 @@
 let canvas;
 let ctx;
 let world;
+let backgroundMusic;
 let keyboard = new Keyboard();
 let startScreenImage = new Image();
 startScreenImage.src = 'img/9_intro_outro_screens/start/startscreen_1.png';
@@ -62,9 +63,17 @@ function startGameOnce() {
  * This function is called after the user clicks on the start screen.
  */
 function startGame() {
+    backgroundMusic = new Audio('audio/guitar.mp3'); // Pfad zur Musik
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = 0.4;
+    backgroundMusic.play().catch((error) => {
+        console.warn("Autoplay prevented:", error);
+    });
+
     world = new World(canvas, keyboard);
-    console.log("My Character is", world.character); // Debug: log the character object
+    console.log("My Character is", world.character);
 }
+
 
 /**
  * Toggles fullscreen mode for the game.

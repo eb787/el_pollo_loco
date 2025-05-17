@@ -17,7 +17,9 @@ class SmallChicken extends MovableObject {
     bottom: 5,
   };
   dead = false;
-  static smallChickens = []; 
+  static smallChickens = [];
+   lastHurtSoundTime = 0;
+  hurtSoundCooldown = 1000; 
 
   constructor() {
     super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
@@ -50,6 +52,7 @@ class SmallChicken extends MovableObject {
     this.dead = true;
     super.die();
     this.loadImage(this.IMAGES_DEAD[0]);
+    this.playHurtSound();
   }
 
   animate() {
@@ -65,5 +68,17 @@ class SmallChicken extends MovableObject {
         this.playAnimation(this.IMAGES_WALKING);
       }
     }, 200);
+  }
+
+     playHurtSound() {
+    let currentTime = new Date().getTime();
+    if (currentTime - this.lastHurtSoundTime > 1000) {
+      let hurtSound = new Audio("audio/jump_small_chicken.mp3");
+      hurtSound.volume = 0.5;
+      hurtSound
+        .play()
+        .catch((e) => console.warn("Chicken-Sound blockiert:", e));
+      this.lastHurtSoundTime = currentTime;
+    }
   }
 }

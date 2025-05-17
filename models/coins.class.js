@@ -7,6 +7,7 @@ class Coins extends MovableObject {
     right: 35,
     bottom: 35,
   };
+   collected = false;
 
   IMAGES_COIN = ["img/8_coin/coin_1.png", "img/8_coin/coin_2.png"];
 
@@ -24,4 +25,12 @@ class Coins extends MovableObject {
       this.img = this.imageCache[this.IMAGES_COIN[this.currentImage]];
     }, 200);
   }
+ 
+playCollectSound() {
+  if (this.collected) return;
+  this.collected = true;
+  let sound = new Audio("audio/collect-coins.mp3");
+  sound.volume = 0.5;
+  sound.play().catch(e => console.warn("Coin sound blockiert:", e));
+}
 }

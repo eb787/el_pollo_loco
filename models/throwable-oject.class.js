@@ -41,16 +41,24 @@ constructor(x, y, throwToLeft = false) {
 }
 
 throw() {
+  this.throwSound = new Audio('audio/rotate-bottle.mp3');
+  this.throwSound.volume = 0.5;
+  this.throwSound.play().catch(e => console.warn('Wurfsound blockiert:', e));
   this.speedY = 20;
   this.applyGravity();
-
   const moveInterval = setInterval(() => {
     this.x += this.throwToLeft ? -10 : 10;
-
     if (this.broken) {
-      clearInterval(moveInterval);
-    }
-  }, 25);
+  clearInterval(moveInterval);
+  if (this.throwSound) {
+    this.throwSound.pause();
+    this.throwSound.currentTime = 0;
+  }
+  let breakSound = new Audio('audio/glassbroken.mp3');
+  breakSound.volume = 0.6;
+  breakSound.play().catch(e => console.warn('Breaksound blockiert:', e));
+}
+  }, 25);;
 
   this.animationInterval = setInterval(() => {
     if (!this.broken && this.y >= this.groundLevel) {
@@ -68,7 +76,6 @@ startSplash() {
   this.currentImage = 0;
 
   clearInterval(this.animationInterval);
-
   this.animationInterval = setInterval(() => {
     if (this.currentImage < this.IMAGE_BOTTLE_SPLASH.length) {
       this.playAnimation(this.IMAGE_BOTTLE_SPLASH);

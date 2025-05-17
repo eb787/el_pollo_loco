@@ -12,6 +12,7 @@ class Salsa extends MovableObject {
     right: 15,
     bottom: 10,
   };
+    collected = false;
 
   constructor(x) {
     super();
@@ -20,5 +21,12 @@ class Salsa extends MovableObject {
 
     const imageIndex = Math.floor(Math.random() * this.IMAGES_SALSA.length);
     this.loadImage(this.IMAGES_SALSA[imageIndex]);
+  }
+    playCollectSalsaSound() {
+    if (this.collected) return;
+    this.collected = true;
+    let sound = new Audio("audio/collect_bottle.mp3");
+    sound.volume = 0.5;
+    sound.play().catch((e) => console.warn("Coin sound blockiert:", e));
   }
 }

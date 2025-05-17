@@ -54,19 +54,36 @@ class Endboss extends MovableObject {
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_ALERT);
     this.x = 2400;
+    this.lastHurtSoundTime = 0;
     this.animate();
   }
 
-  animate() {
-    setInterval(() => {
-      if (this.isDead()) {
-        this.playAnimation(this.IMAGES_DEAD);
-      } else if (this.isHurtByBottle()) {
-        this.playAnimation(this.IMAGES_HURT);
-      } else {
-        this.playAnimation(this.IMAGES_ALERT);
-      }
-    }, 200);
+animate() {
+  setInterval(() => {
+    if (this.isDead()) {
+      this.playAnimation(this.IMAGES_DEAD);
+    }
+    else if (this.isHurtByBottle()) {
+      this.playAnimation(this.IMAGES_HURT);
+      this.playHurtSound(); 
+    }
+    else {
+      this.playAnimation(this.IMAGES_ALERT); 
+    }
+  }, 200);
+}
+
+
+  playHurtSound() {
+  let currentTime = new Date().getTime();
+  if (currentTime - this.lastHurtSoundTime > 1000) { // Cooldown von 1 Sekunde
+    let hurtSound = new Audio('audio/enboss_is_hurt.mp3');
+    hurtSound.volume = 0.6;
+    hurtSound.play().catch(e => console.warn('Endboss Treffer-Sound blockiert:', e));
+
+    this.lastHurtSoundTime = currentTime; // Zeit des letzten abgespielten Sounds speichern
   }
+}
+
 
 }

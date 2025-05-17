@@ -10,7 +10,7 @@ class World {
   salsaStatusBar = new SalsaStatusBar();
   endbossStatusBar = new EndbossStatusBar();
   throwableObjects = [];
-  isGameOver = false; 
+  isGameOver = false;
 
   constructor(canvas, keyboard) {
     this.intervalIds = [];
@@ -20,7 +20,7 @@ class World {
     this.setWorld();
     this.checkIfPlayerWon();
     this.checkIfPlayerWon();
-    this.checkIfPlayerLost(); 
+    this.checkIfPlayerLost();
 
     this.draw();
     this.run();
@@ -75,16 +75,19 @@ class World {
       (obj) => !obj.markedForRemoval
     );
 
-    this.level.coins.forEach((coin, index) => {
-      if (this.character.isColliding(coin)) {
-        this.character.collectCoin();
-        this.level.coins.splice(index, 1);
-        this.coinStatusBar.setPercentage(this.character.coins * 20);
-      }
-    });
+  this.level.coins.forEach((coin, index) => {
+  if (this.character.isColliding(coin)) {
+    coin.playCollectSound(); 
+    this.character.collectCoin();
+    this.level.coins.splice(index, 1);
+    this.coinStatusBar.setPercentage(this.character.coins * 20);
+  }
+});
+
 
     this.level.salsa.forEach((salsa, index) => {
       if (this.character.isColliding(salsa)) {
+        salsa.playCollectSalsaSound()
         this.character.collectSalsa();
         this.level.salsa.splice(index, 1);
         this.salsaStatusBar.setPercentage(this.character.salsa * 20);
@@ -117,7 +120,7 @@ class World {
   }
 
   draw() {
-    if (this.isGameOver) return; 
+    if (this.isGameOver) return;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.translate(this.camera_x, 0);
     this.addObjectsToMap(this.level.backgroundObjects);
@@ -182,7 +185,7 @@ class World {
 
   checkIfPlayerWon() {
     let interval = setInterval(() => {
-      let endboss = this.level.enemies.find(e => e instanceof Endboss);
+      let endboss = this.level.enemies.find((e) => e instanceof Endboss);
       if (endboss && endboss.energy <= 0) {
         clearInterval(interval);
         this.showWinScreen();
@@ -192,16 +195,21 @@ class World {
   }
 
   checkIfPlayerLost() {
-  let interval = setInterval(() => {
-    if (this.character.energy <= 0) {
-      clearInterval(interval);
-      this.showLoseScreen();
-    }
-  }, 200);
-  this.intervalIds.push(interval);
-}
+    let interval = setInterval(() => {
+      if (this.character.energy <= 0) {
+        clearInterval(interval);
+        this.showLoseScreen();
+      }
+    }, 200);
+    this.intervalIds.push(interval);
+  }
 
   showWinScreen() {
+    if (backgroundMusic) {
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
+    }
+
     let winImage = new Image();
     winImage.src = "img/You won, you lost/You won A.png";
     winImage.onload = () => {
@@ -209,35 +217,37 @@ class World {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(winImage, 0, 0, canvas.width, canvas.height);
     };
-    this.stopGame(); // Pausiert das Spiel.
+    this.stopGame(); 
     this.showRestartButton();
-
   }
 
   showLoseScreen() {
-  let loseImage = new Image();
-  loseImage.src = "img/You won, you lost/You lost.png";
-  loseImage.onload = () => {
-    let ctx = this.ctx;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(loseImage, 0, 0, canvas.width, canvas.height);
-  };
-  this.stopGame();
-  this.showRestartButton();
+    if (backgroundMusic) {
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
+    }
 
-}
+    let loseImage = new Image();
+    loseImage.src = "img/You won, you lost/You lost.png";
+    loseImage.onload = () => {
+      let ctx = this.ctx;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(loseImage, 0, 0, canvas.width, canvas.height);
+    };
+    this.stopGame();
+    this.showRestartButton();
+  }
 
   stopGame() {
-    this.clearAllIntervals(); 
-    this.isGameOver = true;  
+    this.clearAllIntervals();
+    this.isGameOver = true;
   }
 
   showRestartButton() {
-  const btn = document.getElementById('restartBtn');
-  btn.style.display = 'block';
-  btn.onclick = () => {
-    location.reload();
-  };
-}
-
+    const btn = document.getElementById("restartBtn");
+    btn.style.display = "block";
+    btn.onclick = () => {
+      location.reload();
+    };
+  }
 }

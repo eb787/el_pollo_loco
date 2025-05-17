@@ -16,6 +16,8 @@ class Chicken extends MovableObject {
   };
   dead = false;
   static chickens = []; 
+  lastHurtSoundTime = 0;
+  hurtSoundCooldown = 1000;
 
   constructor() {
     super().loadImage("img/3_enemies_chicken/chicken_normal/1_walk/1_w.png");
@@ -48,6 +50,7 @@ class Chicken extends MovableObject {
     this.dead = true;
     super.die();
     this.loadImage(this.IMAGES_DEAD[0]);
+     this.playHurtSound();
   }
 
   animate() {
@@ -59,11 +62,22 @@ class Chicken extends MovableObject {
 
     setInterval(() => {
       if (this.dead) {
-        // Nur Standbild, kein Animationwechsel nötig
       } else {
         this.playAnimation(this.IMAGES_WALKING);
       }
     }, 200);
+  }
+
+   playHurtSound() {
+    let currentTime = new Date().getTime();
+    if (currentTime - this.lastHurtSoundTime > 1000) {
+      let hurtSound = new Audio("audio/chicken-crash6.mp3");
+      hurtSound.volume = 0.5;
+      hurtSound
+        .play()
+        .catch((e) => console.warn("Chicken-Sound blockiert:", e));
+      this.lastHurtSoundTime = currentTime;
+    }
   }
 }
 

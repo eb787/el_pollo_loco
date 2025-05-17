@@ -66,17 +66,24 @@ class Character extends MovableObject {
     "img/2_character_pepe/1_idle/long_idle/I-19.png",
     "img/2_character_pepe/1_idle/long_idle/I-20.png",
   ];
+  snoreSound = new Audio("audio/snore_character.mp3");
   world;
   lastMoveTime = Date.now();
   idleDuration = 0;
-  lastThrowTime = 0; 
-  throwCooldown = 700; 
-    offset = {
-  top: 100,
-  left: 15,
-  right: 20 ,
-  bottom: 10
-};
+  lastThrowTime = 0;
+  lastHurtSoundTime = 0;
+  hurtSoundCooldown = 1000;
+  throwCooldown = 700;
+  lastWalkSoundTime = 0;
+  walkSoundCooldown = 400;
+  lastSnoreSoundTime = 0;
+  snoreSoundCooldown = 6000; // alle 6 Sekunden maximal
+  offset = {
+    top: 100,
+    left: 15,
+    right: 20,
+    bottom: 10,
+  };
 
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
@@ -86,7 +93,7 @@ class Character extends MovableObject {
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_IDLE);
     this.loadImages(this.IMAGES_LONG_IDLE);
-    this.applyGravity(); 
+    this.applyGravity();
     this.animate();
   }
 
@@ -96,18 +103,24 @@ class Character extends MovableObject {
         this.moveRight();
         this.otherDirection = false;
         this.lastMoveTime = Date.now();
+        this.stopSnoreSound();
+        if (this.isOnGround()) this.playWalkSound();
       }
       if (this.world.keyboard.LEFT && this.x > 0) {
         this.moveLeft();
         this.otherDirection = true;
-        this.lastMoveTime = Date.now(); 
+        this.lastMoveTime = Date.now();
+        this.stopSnoreSound();
+        if (this.isOnGround()) this.playWalkSound();
       }
       if (this.world.keyboard.SPACE && !this.isAboveGround()) {
         this.jump();
-        this.lastMoveTime = Date.now(); 
+        this.stopSnoreSound();
+        this.lastMoveTime = Date.now();
       }
-       if (this.world.keyboard.D) {
-        this.lastMoveTime = Date.now(); 
+      if (this.world.keyboard.D) {
+        this.stopSnoreSound();
+        this.lastMoveTime = Date.now();
       }
       this.world.camera_x = -this.x + 200;
     }, 1000 / 60);
@@ -116,6 +129,7 @@ class Character extends MovableObject {
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
       } else if (this.isHurt()) {
+        this.playHurtSound();
         this.playAnimation(this.IMAGES_HURT);
       } else if (this.isAboveGround()) {
         this.playAnimation(this.IMAGES_JUMPING);
@@ -126,6 +140,7 @@ class Character extends MovableObject {
           this.idleDuration = Date.now() - this.lastMoveTime;
           if (this.idleDuration > 5000) {
             this.playAnimation(this.IMAGES_LONG_IDLE);
+            this.playSnoreSound();
           } else {
             this.playAnimation(this.IMAGES_IDLE);
           }
@@ -134,7 +149,58 @@ class Character extends MovableObject {
     }, 80);
   }
 
+  playHurtSound() {
+    let currentTime = new Date().getTime();
+    if (currentTime - this.lastHurtSoundTime > 1000) {
+      let hurtSound = new Audio("audio/hurt.mp3");
+      hurtSound.volume = 0.5;
+      hurtSound
+        .play()
+        .catch((e) => console.warn("Charakter-Sound blockiert:", e));
+      this.lastHurtSoundTime = currentTime;
+    }
+  }
+
+  playWalkSound() {
+    let now = Date.now();
+    if (now - this.lastWalkSoundTime > this.walkSoundCooldown) {
+      let walkSound = new Audio("audio/charackter_walking.mp3");
+      walkSound.volume = 0.5;
+      walkSound.play().catch((e) => console.warn("Walk sound blockiert:", e));
+      this.lastWalkSoundTime = now;
+    }
+  }
+
+  playSnoreSound() {
+    let now = Date.now();
+    if (
+      now - this.lastSnoreSoundTime > this.snoreSoundCooldown &&
+      this.snoreSound.paused
+    ) {
+      this.snoreSound.volume = 0.5;
+      this.snoreSound.loop = true;
+      this.snoreSound
+        .play()
+        .catch((e) => console.warn("Snore sound blockiert:", e));
+      this.lastSnoreSoundTime = now;
+    }
+  }
+
+  stopSnoreSound() {
+    if (this.snoreSound && !this.snoreSound.paused) {
+      this.snoreSound.pause();
+      this.snoreSound.currentTime = 0;
+    }
+  }
+
   jump() {
     this.speedY = 25;
+    let jumpSound = new Audio("audio/jump.mp3");
+    jumpSound.volume = 0.5;
+    jumpSound.play().catch((e) => console.warn("Jump sound blockiert:", e));
+  }
+
+  isOnGround() {
+    return !this.isAboveGround();
   }
 }
