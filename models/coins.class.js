@@ -30,7 +30,7 @@ playCollectSound() {
   if (this.collected) return;
   this.collected = true;
   let sound = new Audio("audio/collect-coins.mp3");
-  sound.volume = 0.5;
+  sound.volume = 0.2;
   sound.play().catch(e => console.warn("Coin sound blockiert:", e));
 }
 }

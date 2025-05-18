@@ -3,7 +3,6 @@ class Endboss extends MovableObject {
   width = 280;
   y = 5;
   energy = 100;
-
   IMAGES_ALERT = [
     "img/4_enemie_boss_chicken/2_alert/G5.png",
     "img/4_enemie_boss_chicken/2_alert/G6.png",
@@ -53,37 +52,55 @@ class Endboss extends MovableObject {
     this.loadImages(this.IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_ALERT);
+    this.loadImages(this.IMAGES_WALKING);
+    this.loadImages(this.IMAGES_ATTACK);
     this.x = 2400;
     this.lastHurtSoundTime = 0;
     this.animate();
   }
 
-animate() {
-  setInterval(() => {
-    if (this.isDead()) {
-      this.playAnimation(this.IMAGES_DEAD);
-    }
-    else if (this.isHurtByBottle()) {
-      this.playAnimation(this.IMAGES_HURT);
-      this.playHurtSound(); 
-    }
-    else {
-      this.playAnimation(this.IMAGES_ALERT); 
-    }
-  }, 200);
-}
+  animate() {
+    setInterval(() => {
+      if (!this.character) return; // Verhindert Zugriff auf undefined
+      if (this.isDead()) {
+        this.playAnimation(this.IMAGES_DEAD);
+      } else if (this.isHurtByBottle()) {
+        this.playAnimation(this.IMAGES_HURT);
+        this.playHurtSound();
+      } else {
+        let distance = Math.abs(this.x - this.character.x);
+        if (distance < 500 && distance > 100) {
+          this.moveTowardsCharacter(this.character);
+          this.playAnimation(this.IMAGES_WALKING);
+        } else if (distance <= 200) {
+          this.playAnimation(this.IMAGES_ATTACK);
+        } else {
+          this.playAnimation(this.IMAGES_ALERT);
+        }
+      }
+    }, 150);
+  }
 
+  moveTowardsCharacter(character) {
+    if (this.x < character.x) {
+      this.otherDirection = true; 
+      this.x += 18; 
+    } else {
+      this.otherDirection = false;
+      this.x -= 18; 
+    }
+  }
 
   playHurtSound() {
-  let currentTime = new Date().getTime();
-  if (currentTime - this.lastHurtSoundTime > 1000) { // Cooldown von 1 Sekunde
-    let hurtSound = new Audio('audio/enboss_is_hurt.mp3');
-    hurtSound.volume = 0.6;
-    hurtSound.play().catch(e => console.warn('Endboss Treffer-Sound blockiert:', e));
+    let currentTime = new Date().getTime();
+    if (currentTime - this.lastHurtSoundTime > 1000) {
+      let hurtSound = new Audio("audio/enboss_is_hurt.mp3");
+      hurtSound.volume = 0.6;
+      hurtSound
+        .play()
+        .catch((e) => console.warn("Endboss Treffer-Sound blockiert:", e));
 
-    this.lastHurtSoundTime = currentTime; // Zeit des letzten abgespielten Sounds speichern
+      this.lastHurtSoundTime = currentTime;
+    }
   }
-}
-
-
 }

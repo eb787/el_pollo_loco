@@ -72,7 +72,7 @@ class Chicken extends MovableObject {
     let currentTime = new Date().getTime();
     if (currentTime - this.lastHurtSoundTime > 1000) {
       let hurtSound = new Audio("audio/chicken-crash6.mp3");
-      hurtSound.volume = 0.5;
+      hurtSound.volume = 0.2;
       hurtSound
         .play()
         .catch((e) => console.warn("Chicken-Sound blockiert:", e));

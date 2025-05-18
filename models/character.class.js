@@ -2,7 +2,7 @@ class Character extends MovableObject {
   width = 135;
   height = 250;
   y = 180;
-  speed = 10;
+  speed = 6;
   energy = 100;
   IMAGES_WALKING = [
     "img/2_character_pepe/2_walk/W-21.png",
@@ -153,7 +153,7 @@ class Character extends MovableObject {
     let currentTime = new Date().getTime();
     if (currentTime - this.lastHurtSoundTime > 1000) {
       let hurtSound = new Audio("audio/hurt.mp3");
-      hurtSound.volume = 0.5;
+      hurtSound.volume = 0.1;
       hurtSound
         .play()
         .catch((e) => console.warn("Charakter-Sound blockiert:", e));
@@ -165,7 +165,7 @@ class Character extends MovableObject {
     let now = Date.now();
     if (now - this.lastWalkSoundTime > this.walkSoundCooldown) {
       let walkSound = new Audio("audio/charackter_walking.mp3");
-      walkSound.volume = 0.5;
+      walkSound.volume = 0.2;
       walkSound.play().catch((e) => console.warn("Walk sound blockiert:", e));
       this.lastWalkSoundTime = now;
     }
@@ -177,7 +177,7 @@ class Character extends MovableObject {
       now - this.lastSnoreSoundTime > this.snoreSoundCooldown &&
       this.snoreSound.paused
     ) {
-      this.snoreSound.volume = 0.5;
+      this.snoreSound.volume = 0.2;
       this.snoreSound.loop = true;
       this.snoreSound
         .play()
@@ -196,7 +196,7 @@ class Character extends MovableObject {
   jump() {
     this.speedY = 25;
     let jumpSound = new Audio("audio/character_jump.mp3");
-    jumpSound.volume = 0.5;
+    jumpSound.volume = 0.2;
     jumpSound.play().catch((e) => console.warn("Jump sound blockiert:", e));
   }
 

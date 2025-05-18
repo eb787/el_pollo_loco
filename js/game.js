@@ -34,8 +34,7 @@ function drawStartScreen() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas before drawing
     ctx.drawImage(startScreenImage, 0, 0, canvas.width, canvas.height); // Draw the background image
 
-    // Draw the "Click to Start" text
-    ctx.font = "30px Arial";
+    ctx.font = "30px Comic Sans MS";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
     ctx.fillText("Click to Start", canvas.width / 2, canvas.height - 30);
@@ -45,7 +44,6 @@ function drawStartScreen() {
  * Sets up the click event listener on the canvas to start the game once clicked.
  */
 function setupStartListener() {
-    // Add an event listener for click, calling `startGameOnce` when clicked
     canvas.addEventListener('click', startGameOnce);
 }
 
@@ -65,7 +63,7 @@ function startGameOnce() {
 function startGame() {
     backgroundMusic = new Audio('audio/guitar.mp3'); // Pfad zur Musik
     backgroundMusic.loop = true;
-    backgroundMusic.volume = 0.4;
+    backgroundMusic.volume = 0.1;
     backgroundMusic.play().catch((error) => {
         console.warn("Autoplay prevented:", error);
     });
