@@ -67,9 +67,9 @@ function startGame() {
     backgroundMusic.play().catch((error) => {
         console.warn("Autoplay prevented:", error);
     });
-
     world = new World(canvas, keyboard);
     console.log("My Character is", world.character);
+    setupMobileControls(); // Call this function to set up mobile controls
 }
 
 
@@ -124,3 +124,46 @@ window.addEventListener("keyup", (e) => {
     if (e.keyCode == 32) keyboard.SPACE = false;
     if (e.keyCode == 68) keyboard.D = false;
 });
+
+function setupMobileControls() {
+    const leftButton = document.getElementById("button_left");
+    const rightButton = document.getElementById("button_right");
+    const jumpButton = document.getElementById("button_jump");
+    const throwButton = document.getElementById("button_throw");
+
+    // Touchstart = gedrückt halten
+    leftButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        keyboard.LEFT = true;
+    });
+    rightButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        keyboard.RIGHT = true;
+    });
+    jumpButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        keyboard.SPACE = true;
+    });
+    throwButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        keyboard.D = true;
+    });
+
+    // Touchend = loslassen
+    leftButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keyboard.LEFT = false;
+    });
+    rightButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keyboard.RIGHT = false;
+    });
+    jumpButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keyboard.SPACE = false;
+    });
+    throwButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keyboard.D = false;
+    });
+}
