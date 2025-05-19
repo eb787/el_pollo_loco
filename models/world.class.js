@@ -31,7 +31,7 @@ class World {
         this.checkThrowObjects();
         this.checkCollisions();
         this.checkIfPlayerWon();
-      }, 100);
+      }, 70);
     }
   }
 
@@ -136,7 +136,7 @@ handleChickenCollision(chicken) {
     characterBottom < chickenTop + chicken.height
   ) {
     chicken.die();
-    this.character.speedY = 25;
+    this.character.speedY = 20;
   } else {
     this.character.hit();
     this.statusBar.setPercentage(this.character.energy);
@@ -145,7 +145,7 @@ handleChickenCollision(chicken) {
 
 handleEndbossCollision() {
   if (!this.characterRecentlyHit) {
-    this.character. hitEndboss(); 
+    this.character.hitEndboss(); 
     this.statusBar.setPercentage(this.character.energy);
     this.characterRecentlyHit = true;
 

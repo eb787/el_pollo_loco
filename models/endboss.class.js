@@ -61,7 +61,7 @@ class Endboss extends MovableObject {
 
   animate() {
     setInterval(() => {
-      if (!this.character) return; // Verhindert Zugriff auf undefined
+      if (!this.character) return; 
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
       } else if (this.isHurtByBottle()) {
@@ -69,7 +69,7 @@ class Endboss extends MovableObject {
         this.playHurtSound();
       } else {
         let distance = Math.abs(this.x - this.character.x);
-        if (distance < 500 && distance > 100) {
+        if (distance < 600 && distance > 100) {
           this.moveTowardsCharacter(this.character);
           this.playAnimation(this.IMAGES_WALKING);
         } else if (distance <= 200) {

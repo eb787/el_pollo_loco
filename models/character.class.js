@@ -77,7 +77,7 @@ class Character extends MovableObject {
   lastWalkSoundTime = 0;
   walkSoundCooldown = 400;
   lastSnoreSoundTime = 0;
-  snoreSoundCooldown = 6000; // alle 6 Sekunden maximal
+  snoreSoundCooldown = 6000; 
   offset = {
     top: 100,
     left: 15,
@@ -130,6 +130,7 @@ class Character extends MovableObject {
         this.playAnimation(this.IMAGES_DEAD);
       } else if (this.isHurt()) {
         this.playHurtSound();
+        console.log(this.world.character.energy)
         this.playAnimation(this.IMAGES_HURT);
       } else if (this.isAboveGround()) {
         this.playAnimation(this.IMAGES_JUMPING);
