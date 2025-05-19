@@ -12,7 +12,6 @@ const level1 = new Level(
   [new Cloud(),
     new Cloud(),
     new Cloud(),
-
   ],
 
   [
@@ -53,6 +52,6 @@ const level1 = new Level(
     new Salsa(700, 300),
     new Salsa(1200, 300),
     new Salsa(1800, 300),
-    new Salsa(2300, 300)
+    new Salsa(2100, 300)
   ]
 );
