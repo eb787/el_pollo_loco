@@ -1,60 +1,19 @@
-/**
- * Base class for drawable game objects.
- * Handles loading and drawing of images, as well as basic hitbox representation.
- */
 class DrawableObject {
-  /**
-   * The current image to be displayed.
-   * @type {HTMLImageElement}
-   */
   img;
-
-  /**
-   * A cache of preloaded images indexed by their path.
-   * @type {Object.<string, HTMLImageElement>}
-   */
   imageCache = {};
-
-  /**
-   * Index of the current image in an animation array.
-   * @type {number}
-   */
   currentImage = 0;
-
-  /**
-   * X position on the canvas.
-   * @type {number}
-   */
   x = 50;
-
-  /**
-   * Y position on the canvas.
-   * @type {number}
-   */
   y = 225;
-
-  /**
-   * Width of the object.
-   * @type {number}
-   */
   width = 165;
-
-  /**
-   * Height of the object.
-   * @type {number}
-   */
   height = 130;
-
-  /**
-   * Hitbox offset to fine-tune collision detection.
-   * @type {{ top: number, left: number, right: number, bottom: number }}
-   */
   offset = {
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
   };
+  
+  
 
   /**
    * Loads a single image into this.img.
@@ -76,6 +35,32 @@ class DrawableObject {
       this.imageCache[path] = img;
     });
   }
+
+   /**
+   * Registers a sound in the world's global sound list for global control.
+   * @param {HTMLAudioElement} sound - The sound to register.
+   */
+  registerSound(audio) {
+    if (this.world?.allSounds && !this.world.allSounds.includes(audio)) {
+      this.world.allSounds.push(audio);
+    }
+  }
+
+  /**
+   * This method will be called whenever a new Audio object is created.
+   * It will automatically register the sound and return it.
+   * 
+   * @param {string} path - The file path of the sound to create.
+   * @param {number} [volume=0.2] - The volume level of the audio (default is 0.2).
+   * @returns {HTMLAudioElement} The created Audio object.
+   */
+createAudio(src, volume = 1, loop = false) {
+  const audio = new Audio(src);
+  audio.volume = volume;
+  audio.loop = loop;
+  this.registerSound(audio); 
+  return audio;
+}
 
   /**
    * Draws the current image of this object on the canvas.

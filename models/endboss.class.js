@@ -3,6 +3,8 @@ class Endboss extends MovableObject {
   width = 280;
   y = 5;
   energy = 100;
+  world;
+
   IMAGES_ALERT = [
     "img/4_enemie_boss_chicken/2_alert/G5.png",
     "img/4_enemie_boss_chicken/2_alert/G6.png",
@@ -13,12 +15,14 @@ class Endboss extends MovableObject {
     "img/4_enemie_boss_chicken/2_alert/G11.png",
     "img/4_enemie_boss_chicken/2_alert/G12.png",
   ];
+
   IMAGES_WALKING = [
     "img/4_enemie_boss_chicken/1_walk/G1.png",
     "img/4_enemie_boss_chicken/1_walk/G2.png",
     "img/4_enemie_boss_chicken/1_walk/G3.png",
     "img/4_enemie_boss_chicken/1_walk/G4.png",
   ];
+
   IMAGES_ATTACK = [
     "img/4_enemie_boss_chicken/3_attack/G13.png",
     "img/4_enemie_boss_chicken/3_attack/G14.png",
@@ -29,17 +33,23 @@ class Endboss extends MovableObject {
     "img/4_enemie_boss_chicken/3_attack/G19.png",
     "img/4_enemie_boss_chicken/3_attack/G20.png",
   ];
+
   IMAGES_HURT = [
     "img/4_enemie_boss_chicken/4_hurt/G21.png",
     "img/4_enemie_boss_chicken/4_hurt/G22.png",
     "img/4_enemie_boss_chicken/4_hurt/G23.png",
   ];
+
   IMAGES_DEAD = [
     "img/4_enemie_boss_chicken/5_dead/G24.png",
     "img/4_enemie_boss_chicken/5_dead/G25.png",
     "img/4_enemie_boss_chicken/5_dead/G26.png",
   ];
-  world;
+
+  AUDIOS = {
+    hurt: ["audio/enboss_is_hurt.mp3", 0.6],
+  };
+
   offset = {
     top: 80,
     left: 10,
@@ -47,6 +57,10 @@ class Endboss extends MovableObject {
     bottom: 10,
   };
 
+  /**
+   * Creates an instance of the Endboss.
+   * Loads images for various animations, sets up sounds, and starts the animation.
+   */
   constructor() {
     super().loadImage("img/4_enemie_boss_chicken/2_alert/G5.png");
     this.loadImages(this.IMAGES_DEAD);
@@ -54,14 +68,29 @@ class Endboss extends MovableObject {
     this.loadImages(this.IMAGES_ALERT);
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_ATTACK);
+
     this.x = 2400;
     this.lastHurtSoundTime = 0;
+
+    // Sounds initialisieren
+    this.sounds = {};
+    for (let key in this.AUDIOS) {
+      const [src, volume] = this.AUDIOS[key];
+      this.sounds[key] = this.createAudio(src, volume);
+      this.registerSound(this.sounds[key]);
+    }
+
     this.animate();
   }
 
+  /**
+   * Controls the animation and behavior of the Endboss.
+   * It chooses the appropriate animation based on the Endboss's state.
+   */
   animate() {
     setInterval(() => {
-      if (!this.character) return; 
+      if (!this.character) return;
+
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
       } else if (this.isHurtByBottle()) {
@@ -81,26 +110,36 @@ class Endboss extends MovableObject {
     }, 150);
   }
 
+  /**
+   * Moves the Endboss towards the character.
+   * @param {Object} character - The character object that the Endboss moves towards.
+   */
   moveTowardsCharacter(character) {
     if (this.x < character.x) {
-      this.otherDirection = true; 
-      this.x += 18; 
+      this.otherDirection = true;
+      this.x += 18;
     } else {
       this.otherDirection = false;
-      this.x -= 18; 
+      this.x -= 18;
     }
   }
 
+  /**
+   * Plays the sound when the Endboss is hurt.
+   * Ensures the hurt sound is played with a cooldown to avoid multiple plays.
+   */
   playHurtSound() {
-    let currentTime = new Date().getTime();
-    if (currentTime - this.lastHurtSoundTime > 1000) {
-      let hurtSound = new Audio("audio/enboss_is_hurt.mp3");
-      hurtSound.volume = 0.6;
-      hurtSound
-        .play()
-        .catch((e) => console.warn("Endboss Treffer-Sound blockiert:", e));
-
-      this.lastHurtSoundTime = currentTime;
+      if (this.world?.isMuted) return; 
+    const now = Date.now();
+    if (now - this.lastHurtSoundTime > 1000) {
+      if (this.sounds.hurt) {
+        this.sounds.hurt.play().catch(e =>
+          console.warn("Endboss Treffer-Sound blockiert:", e)
+        );
+        this.lastHurtSoundTime = now;
+      } else {
+        console.warn("Endboss-Sound nicht gefunden!");
+      }
     }
   }
 }
