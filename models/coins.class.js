@@ -1,8 +1,3 @@
-/**
- * Class representing a Coin.
- * The coin object that the player can collect.
- * It also handles the animation of the coin and plays a sound when collected.
- */
 class Coins extends MovableObject {
   height = 120;
   width = 120;
@@ -12,15 +7,11 @@ class Coins extends MovableObject {
     right: 35,
     bottom: 35,
   };
-  collected = false;
-
-  // Image sources for coin animation
   IMAGES_COIN = ["img/8_coin/coin_1.png", "img/8_coin/coin_2.png"];
-
-  // Audio configuration: path and volume
   AUDIOS = {
     collect: ["audio/collect-coins.mp3", 0.2],
   };
+  collected = false;
 
   /**
    * Creates an instance of the Coin.
@@ -33,29 +24,9 @@ class Coins extends MovableObject {
     this.loadImages(this.IMAGES_COIN);
     this.loadImage(this.IMAGES_COIN[0]);
     this.x = x;
-    this.y = y;
-    this.initSounds(); 
+    this.y = y; 
     this.animate();
   }
-
-  /**
-   * Initializes the sounds defined in AUDIOS and registers them globally.
-   */
- initSounds() {
-  this.sounds = {};
-  if (this.AUDIOS) {
-    for (let key in this.AUDIOS) {
-      const [src, volume] = this.AUDIOS[key];
-      const audio = this.createAudio(src, volume);
-      this.sounds[key] = audio;
-      this.registerSound(audio);
-      if (this.world?.isMuted) {
-        audio.muted = true;
-      }
-    }
-  }
-}
-
 
   /**
    * Handles the animation of the coin.
@@ -80,5 +51,4 @@ class Coins extends MovableObject {
     sound.play().catch(e => console.warn("Coin sound blocked:", e));
   }
 }
-
 }

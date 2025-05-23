@@ -2,28 +2,21 @@ class SmallChicken extends MovableObject {
   y = 375;
   width = 50;
   height = 55;
-
   IMAGES_WALKING = [
     "img/3_enemies_chicken/chicken_small/1_walk/1_w.png",
     "img/3_enemies_chicken/chicken_small/1_walk/2_w.png",
     "img/3_enemies_chicken/chicken_small/1_walk/3_w.png",
   ];
-
-  IMAGES_DEAD = [
-    "img/3_enemies_chicken/chicken_small/2_dead/dead.png",
-  ];
-
+  IMAGES_DEAD = ["img/3_enemies_chicken/chicken_small/2_dead/dead.png"];
   AUDIOS = {
     hurt: ["audio/jump_small_chicken.mp3", 0.5],
   };
-
   offset = {
     top: 5,
     left: 5,
     right: 5,
     bottom: 5,
   };
-
   dead = false;
   static smallChickens = [];
   lastHurtSoundTime = 0;
@@ -36,13 +29,6 @@ class SmallChicken extends MovableObject {
   constructor() {
     super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
     this.loadImages(this.IMAGES_WALKING);
-
-    this.sounds = {};
-    for (let key in this.AUDIOS) {
-      const [src, volume] = this.AUDIOS[key];
-      this.sounds[key] = this.createAudio(src, volume);
-      this.registerSound(this.sounds[key]);
-    }
 
     this.x = this.getRandomPosition();
     this.speed = 0.15 + Math.random() * 0.45;
@@ -104,13 +90,13 @@ class SmallChicken extends MovableObject {
    * Ensures that the sound is played only once every cooldown period.
    */
   playHurtSound() {
-      if (this.world?.isMuted) return; 
+    if (this.world?.isMuted) return;
     const currentTime = Date.now();
     if (currentTime - this.lastHurtSoundTime > this.hurtSoundCooldown) {
       if (this.sounds.hurt) {
-        this.sounds.hurt.play().catch((e) =>
-          console.warn("SmallChicken sound blocked:", e)
-        );
+        this.sounds.hurt
+          .play()
+          .catch((e) => console.warn("SmallChicken sound blocked:", e));
         this.lastHurtSoundTime = currentTime;
       } else {
         console.warn("SmallChicken hurt sound not found!");

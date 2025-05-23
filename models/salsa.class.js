@@ -37,33 +37,24 @@ class Salsa extends MovableObject {
     super(); // Automatically loads audio via DrawableObject constructor
     this.loadImages(this.IMAGES_SALSA);
     this.x = x;
-    
-    // Sounds initialisieren
-    this.sounds = {};
-    for (let key in this.AUDIOS) {
-      const [src, volume] = this.AUDIOS[key];
-      this.sounds[key] = this.createAudio(src, volume);
-      this.registerSound(this.sounds[key]);
-    }
-
     const imageIndex = Math.floor(Math.random() * this.IMAGES_SALSA.length);
     this.loadImage(this.IMAGES_SALSA[imageIndex]);
   }
 
-  /**
-   * Plays the sound when the salsa bottle is collected.
-   * Only plays once to prevent repeated triggering.
-   */
-  playCollectSalsaSound() {
-     if (this.world?.isMuted || this.collected) return;
-    this.collected = true;
+/**
+ * Plays the sound when the salsa bottle is collected.
+ * Only plays once to prevent repeated triggering.
+ */
+playCollectSalsaSound() {
+  if (this.collected || this.world?.isMuted) return; 
+  this.collected = true;
 
-    const sound = this.sounds?.collect;
-    if (sound) {
-      sound.muted = this.world?.isMuted || false;
-      sound.play().catch(e => console.warn("Collect sound blocked:", e));
-    } else {
-      console.warn("Salsa collect sound not found!");
-    }
+  const sound = this.sounds?.collect;
+  if (sound) {
+    sound.volume = this.AUDIOS.collect[1];
+    sound.play().catch(e => console.warn("Collect sound blocked:", e));
+  } else {
+    console.warn("Salsa collect sound not found!");
   }
+}
 }

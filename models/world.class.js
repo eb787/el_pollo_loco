@@ -13,7 +13,19 @@ class World {
   isGameOver = false;
   characterRecentlyHit = false;
   allSounds = [];
+  AUDIOS = {
+    win: ["audio/win.mp3", 0.5],
+    lose: ["audio/fail.mp3", 0.5],
+  };
 
+  /**
+   * Creates a new World instance.
+   * Initializes canvas context, keyboard input, sets up the game world,
+   * and starts the main game loop and win/lose checks.
+   *
+   * @param {HTMLCanvasElement} canvas - The canvas element where the game is drawn.
+   * @param {Object} keyboard - The keyboard input handler.
+   */
   constructor(canvas, keyboard) {
     this.intervalIds = [];
     this.keyboard = keyboard;
@@ -26,6 +38,10 @@ class World {
     this.run();
   }
 
+  /**
+   * Starts the game loop for throwing objects and collision checks,
+   * if the game is not over.
+   */
   run() {
     if (!this.isGameOver) {
       this.setSafeInterval(() => {
@@ -35,39 +51,97 @@ class World {
     }
   }
 
+  /**
+   * Sets the world reference and initializes sounds for
+   * the character and all relevant game objects.
+   */
   setWorld() {
     this.character.world = this;
-    this.level.enemies.forEach((enemy) => {
-      enemy.world = this;
-      if (enemy instanceof Endboss) {
-        enemy.character = this.character;
+    if (typeof this.character.initSounds === "function") {
+      this.character.initSounds();
+    }
+    const objectLists = [
+      this.level.enemies,
+      this.level.salsa,
+      this.level.coins,
+      this.throwableObjects,
+    ];
+
+    objectLists.forEach((list) => this.assignWorldAndSounds(list));
+  }
+
+  /**
+   * Assigns the world reference and initializes sounds for each object in the array.
+   * If the object is an Endboss, assigns the character reference as well.
+   *
+   * @param {Array} objects - Array of game objects.
+   */
+  assignWorldAndSounds(objects) {
+    objects.forEach((obj) => {
+      obj.world = this;
+
+      if (obj instanceof Endboss) {
+        obj.character = this.character;
+      }
+
+      if (typeof obj.initSounds === "function") {
+        obj.initSounds();
       }
     });
   }
 
+  /**
+   * Checks if the character can throw a bottle and throws one if possible.
+   */
   checkThrowObjects() {
     let now = Date.now();
-    if (
-      this.keyboard.D &&
-      this.character.salsa > 0 &&
-      now - this.character.lastThrowTime > this.character.throwCooldown
-    ) {
+    if (this.canThrowBottle(now)) {
       this.character.lastThrowTime = now;
-      let bottleX = this.character.otherDirection
-        ? this.character.x - 30
-        : this.character.x + this.character.width;
-      let bottleY = this.character.y + 100;
-      let bottle = new ThrowableObject(
-        bottleX,
-        bottleY,
-        this.character.otherDirection
-      );
-      this.throwableObjects.push(bottle);
-      this.character.salsa--;
-      this.salsaStatusBar.setPercentage(this.character.salsa * 20);
+      this.throwBottle();
     }
   }
 
+  /**
+   * Checks whether the character is allowed to throw a bottle.
+   * Conditions:
+   * - The "D" key is pressed
+   * - The character has salsa bottles left
+   * - Enough time has passed since the last throw
+   *
+   * @param {number} now - Current timestamp in milliseconds
+   * @returns {boolean} True if the character can throw a bottle.
+   */
+  canThrowBottle(now) {
+    return (
+      this.keyboard.D &&
+      this.character.salsa > 0 &&
+      now - this.character.lastThrowTime > this.character.throwCooldown
+    );
+  }
+
+  /**
+   * Creates and throws a new bottle:
+   * - Sets its position and direction
+   * - Starts the throw animation and sound
+   * - Adds it to the world and updates the throwableObjects array
+   */
+  throwBottle() {
+    const x = this.character.x + 50;
+    const y = this.character.y + 100;
+    const throwToLeft = this.character.otherDirection;
+    const bottle = new ThrowableObject(x, y, throwToLeft);
+    bottle.world = this;
+    bottle.initSounds();
+    bottle.startThrowWithSound();
+    this.throwableObjects.push(bottle);
+    this.character.salsa--;
+    this.salsaStatusBar.setPercentage(this.character.salsa * 20);
+  }
+
+  /**
+   * Checks for all types of collisions between the character,
+   * enemies, coins, salsa, and thrown objects.
+   */
   checkCollisions() {
     this.handleBottleHits();
     this.handleCoinCollision();
@@ -75,24 +149,38 @@ class World {
     this.handleEnemyCollisions();
   }
 
+  /**
+   * Handles collisions of thrown bottles with the Endboss.
+   * Removes bottles that have been broken.
+   */
   handleBottleHits() {
     this.throwableObjects.forEach((bottle) => {
-      if (!bottle.broken && world.level.enemies[3].isColliding(bottle)) {
-        world.level.enemies[3].hitByBottle();
-        this.endbossStatusBar.setPercentage(world.level.enemies[3].energy);
-        bottle.startSplash();
-      }
+      if (bottle.broken) return;
+      world.level.enemies.forEach((enemy) => {
+        if (enemy.isColliding(bottle)) {
+          enemy.hitByBottle(); // Wird das wirklich aufgerufen?
+          if (enemy instanceof Endboss) {
+            this.endbossStatusBar.setPercentage(enemy.energy);
+          }
+          bottle.startSplash();
+        }
+      });
     });
 
+    // Entferne zerstörte Flaschen
     this.throwableObjects = this.throwableObjects.filter(
       (obj) => !obj.markedForRemoval
     );
   }
 
+  /**
+   * Handles collision between the character and salsa pickups.
+   * Plays sound, updates character salsa count, and status bar.
+   */
   handleSalsaCollision() {
     this.level.salsa.forEach((salsa, index) => {
       if (this.character.isColliding(salsa)) {
-        if (!this.world?.isMuted) {
+        if (!this.isMuted) {
           salsa.playCollectSalsaSound();
         }
         this.character.collectSalsa();
@@ -102,10 +190,14 @@ class World {
     });
   }
 
+  /**
+   * Handles collision between the character and coins.
+   * Plays sound, updates character coins count, and status bar.
+   */
   handleCoinCollision() {
     this.level.coins.forEach((coin, index) => {
       if (this.character.isColliding(coin)) {
-        if (!this.world?.isMuted) {
+        if (!this.isMuted) {
           coin.playCollectSound();
         }
         this.character.collectCoin();
@@ -115,6 +207,10 @@ class World {
     });
   }
 
+  /**
+   * Handles collisions between the character and enemies.
+   * Differentiates behavior for chickens and the Endboss.
+   */
   handleEnemyCollisions() {
     for (let enemy of this.level.enemies) {
       if (enemy.dead) continue;
@@ -129,6 +225,13 @@ class World {
     }
   }
 
+  /**
+   * Handles collision between the character and a chicken enemy.
+   * If the character is falling on the chicken, kills the chicken.
+   * Otherwise, the character takes damage.
+   *
+   * @param {Chicken|SmallChicken} chicken - The chicken enemy collided with.
+   */
   handleChickenCollision(chicken) {
     let characterBottom = this.character.y + this.character.height;
     let chickenTop = chicken.y;
@@ -147,6 +250,10 @@ class World {
     }
   }
 
+  /**
+   * Handles collision between the character and the Endboss.
+   * Prevents repeated damage within a short cooldown.
+   */
   handleEndbossCollision() {
     if (!this.characterRecentlyHit) {
       this.character.hitEndboss();
@@ -159,6 +266,11 @@ class World {
     }
   }
 
+  /**
+   * Clears the canvas and redraws all game elements, including the background,
+   * character, enemies, projectiles, items, and status bars.
+   * Uses requestAnimationFrame for continuous animation.
+   */
   draw() {
     if (this.isGameOver) return;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -182,12 +294,22 @@ class World {
     });
   }
 
+  /**
+   * Adds multiple game objects to the canvas map.
+   *
+   * @param {Array} objects - Array of drawable game objects.
+   */
   addObjectsToMap(objects) {
     objects.forEach((o) => {
       this.addToMap(o);
     });
   }
 
+  /**
+   * Draws a single game object on the canvas, flipping it if necessary.
+   *
+   * @param {Object} mo - The movable object to draw.
+   */
   addToMap(mo) {
     if (mo.otherDirection) {
       this.flipImage(mo);
@@ -201,42 +323,69 @@ class World {
     }
   }
 
+  /**
+   * Flips the canvas context horizontally to mirror the image.
+   *
+   * @param {Object} mo - The movable object to flip.
+   */
   flipImage(mo) {
     this.ctx.save();
     this.ctx.scale(-1, 1);
     mo.x = -mo.x - mo.width;
   }
 
+  /**
+   * Restores the canvas context after flipping the image.
+   *
+   * @param {Object} mo - The movable object to flip back.
+   */
   flipImageBack(mo) {
     mo.x = -mo.x - mo.width;
     this.ctx.restore();
   }
 
+  /**
+   * Creates and stores an interval ID to manage repeating functions safely.
+   *
+   * @param {Function} fn - The function to execute repeatedly.
+   * @param {number} time - The interval time in milliseconds.
+   * @returns {number} The interval ID.
+   */
   setSafeInterval(fn, time) {
     let id = setInterval(fn, time);
     this.intervalIds.push(id);
     return id;
   }
 
+  /**
+   * Clears all stored intervals to stop repeating functions.
+   */
   clearAllIntervals() {
     this.intervalIds.forEach(clearInterval);
     this.intervalIds = [];
   }
 
+  /**
+   * Stops the game by clearing intervals, stopping sounds,
+   * and marking the game as over.
+   */
   stopGame() {
     this.clearAllIntervals();
     this.stopAllSounds();
     this.isGameOver = true;
   }
 
+  /**
+   * Stops all playing sounds including background music and other audios.
+   */
   stopAllSounds() {
-    if (backgroundMusic && !backgroundMusic.paused) {
-      backgroundMusic.pause();
-      backgroundMusic.currentTime = 0;
+    if (this.backgroundMusic && !this.backgroundMusic.paused) {
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
     }
 
-    if (this.world && this.world.allSounds) {
-      this.world.allSounds.forEach((audio) => {
+    if (this.allSounds) {
+      this.allSounds.forEach((audio) => {
         if (audio && !audio.paused) {
           audio.pause();
           audio.currentTime = 0;
@@ -245,6 +394,22 @@ class World {
     }
   }
 
+  onMuteChange(isMuted) {
+    if (this.backgroundMusic) {
+      this.backgroundMusic.muted = isMuted;
+    }
+    if (this.allSounds) {
+      this.allSounds.forEach((audio) => {
+        audio.muted = isMuted;
+      });
+    }
+    this.isMuted = isMuted;
+  }
+
+  /**
+   * Continuously checks if the player has defeated the Endboss.
+   * Shows the win screen once the Endboss energy reaches zero.
+   */
   checkIfPlayerWon() {
     let interval = setInterval(() => {
       let endboss = this.level.enemies.find((e) => e instanceof Endboss);
@@ -259,6 +424,10 @@ class World {
     this.intervalIds.push(interval);
   }
 
+  /**
+   * Continuously checks if the player has lost (energy <= 0).
+   * Shows the lose screen when the player is out of energy.
+   */
   checkIfPlayerLost() {
     let interval = setInterval(() => {
       if (this.character.energy <= 0) {
@@ -269,12 +438,23 @@ class World {
     this.intervalIds.push(interval);
   }
 
+  /**
+   * Displays the win screen:
+   * - Stops background music
+   * - Plays win sound
+   * - Draws win image on canvas
+   * - Stops the game and shows restart button
+   */
   showWinScreen() {
-    if (backgroundMusic) {
-      backgroundMusic.pause();
-      backgroundMusic.currentTime = 0;
+    if (this.backgroundMusic) {
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
     }
-
+    if (!this.isMuted) {
+      const winAudio = new Audio(this.AUDIOS.win[0]);
+      winAudio.volume = this.AUDIOS.win[1];
+      winAudio.play().catch((e) => console.warn("Win sound blocked:", e));
+    }
     let winImage = new Image();
     winImage.src = "img/You won, you lost/You won A.png";
     winImage.onload = () => {
@@ -286,12 +466,23 @@ class World {
     this.showRestartButton();
   }
 
+  /**
+   * Displays the lose screen:
+   * - Stops background music
+   * - Plays lose sound
+   * - Draws lose image on canvas
+   * - Stops the game and shows restart button
+   */
   showLoseScreen() {
-    if (backgroundMusic) {
-      backgroundMusic.pause();
-      backgroundMusic.currentTime = 0;
+    if (this.backgroundMusic) {
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
     }
-
+    if (!this.isMuted) {
+      const loseAudio = new Audio(this.AUDIOS.lose[0]);
+      loseAudio.volume = this.AUDIOS.lose[1];
+      loseAudio.play().catch((e) => console.warn("Lose sound blocked:", e));
+    }
     let loseImage = new Image();
     loseImage.src = "img/You won, you lost/You lost.png";
     loseImage.onload = () => {
@@ -303,6 +494,9 @@ class World {
     this.showRestartButton();
   }
 
+  /**
+   * Shows the restart button and reloads the page when clicked.
+   */
   showRestartButton() {
     const btn = document.getElementById("restartBtn");
     btn.style.display = "block";

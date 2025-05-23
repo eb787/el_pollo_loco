@@ -1,7 +1,3 @@
-/**
- * @file game.js
- * Main JavaScript file for controlling the game flow, including the start screen, game initialization, and player input.
- */
 let canvas;
 let ctx;
 let world;
@@ -9,9 +5,6 @@ let backgroundMusic;
 let keyboard = new Keyboard();
 let startScreenImage = new Image();
 startScreenImage.src = "img/9_intro_outro_screens/start/startscreen_1.png";
-AUDIOS = {
-  hurt: ["audio/enboss_is_hurt.mp3", 0.6],
-};
 let isMuted = false; // Variable to track mute state
 
 /**
@@ -66,20 +59,24 @@ function startGameOnce() {
  * This function is called after the user clicks on the start screen.
  */
 function startGame() {
-  backgroundMusic = new Audio("audio/guitar.mp3");
-  backgroundMusic.loop = true;
-  backgroundMusic.volume = 0.1;
-  backgroundMusic.muted = isMuted; // Setzt die Musikstummung nach dem globalen Zustand
+  world = new World(canvas, keyboard);
+  world.isMuted = isMuted;
 
-  backgroundMusic.play().catch((error) => {
+  world.backgroundMusic = new Audio("audio/guitar.mp3");
+  world.backgroundMusic.loop = true;
+  world.backgroundMusic.volume = 0.1;
+  world.backgroundMusic.muted = isMuted;
+
+  world.backgroundMusic.play().catch((error) => {
     console.warn("Autoplay verhindert:", error);
   });
 
-  world = new World(canvas, keyboard);
-  world.isMuted = isMuted; // Synchronisiere die mute-Einstellung mit der Welt
-  console.log("My Character is", world.character);
   setupMobileControls();
 }
+
+
+
+
 
 /**
  * Toggles fullscreen mode for the game.
@@ -111,32 +108,29 @@ function toggleFullscreen() {
 }
 
 function toggleMute() {
-  isMuted = !isMuted;
-
-  // Welt-Zustand aktualisieren (überprüfe, ob world definiert ist)
+  isMuted = !isMuted;  
+   world.onMuteChange(isMuted);
   if (world) {
-    world.isMuted = isMuted;
+    world.isMuted = isMuted; // Update für die Welt
+
+    // Alle existierenden Sounds muten
     world.allSounds.forEach((audio) => {
-      audio.muted = isMuted; // Alle Sounds werden gemutet oder ungemutet
+      audio.muted = isMuted;  
     });
   }
-
-  // Alle DOM-Audioelemente muten
+  
+  // Falls du andere Audio-Elemente im HTML hast:
   document.querySelectorAll("audio").forEach((audio) => {
     audio.muted = isMuted;
   });
 
-  // Hintergrundmusik muten
   if (backgroundMusic) {
     backgroundMusic.muted = isMuted;
   }
 
-  // Ändere den Text des Mute-Buttons
   const muteBtn = document.getElementById("muteBtn");
   muteBtn.textContent = isMuted ? "🔇 Stumm" : "🔊 Ton an";
 }
-
-
 
 
 /**

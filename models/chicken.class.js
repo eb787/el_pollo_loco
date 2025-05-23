@@ -12,12 +12,12 @@ class Chicken extends MovableObject {
     hurt: ["audio/chicken-crash6.mp3", 0.2],
   };
   offset = {
-    top: 5,
-    left: 5,
-    right: 5,
-    bottom: 5,
+    top: 2,
+    left: 2,
+    right: 2,
+    bottom: 2,
   };
-   world;
+  world;
   dead = false;
   static chickens = [];
   lastHurtSoundTime = 0;
@@ -31,17 +31,10 @@ class Chicken extends MovableObject {
     super().loadImage("img/3_enemies_chicken/chicken_normal/1_walk/1_w.png");
     this.loadImages(this.IMAGES_WALKING);
     this.x = this.getRandomPosition();
+    this.energy = 20;
     this.speed = 0.15 + Math.random() * 0.35;
     Chicken.chickens.push(this);
     this.animate();
-
-    this.sounds = {};
-    for (let key in this.AUDIOS) {
-      const [src, volume] = this.AUDIOS[key];
-      const sound = this.createAudio(src, volume);
-      this.sounds[key] = sound;
-      this.registerSound(sound); 
-    }
   }
 
   /**
@@ -68,38 +61,62 @@ class Chicken extends MovableObject {
   /**
    * Marks the chicken as dead, updates its image, and plays the hurt sound.
    */
-  die() {
-    this.dead = true;
-    super.die();
-    this.loadImage(this.IMAGES_DEAD[0]);
-    this.playHurtSound();
+die() {
+  if (this.dead) return; // Falls schon tot, nichts tun
+  console.log("Chicken died");
+
+  this.dead = true;
+  this.loadImage(this.IMAGES_DEAD[0]);
+  this.playHurtSound();
+
+  clearInterval(this.movementInterval);
+  clearInterval(this.walkAnimationInterval);
+}
+
+
+
+hitByBottle() {
+  console.log("Chicken hit by bottle");
+
+  this.energy -= 20;
+  if (this.energy < 0) this.energy = 0;
+
+  if (this.energy === 0 && !this.dead) {
+    console.log("Chicken has no energy, calling die()");
+    this.die();
   }
+
+  this.lastHitBottle = new Date().getTime();
+}
+
+
 
   /**
    * Handles the chicken's movement and animation.
    * Makes the chicken move left and play walking animation when alive.
    */
-  animate() {
-    setInterval(() => {
-      if (!this.dead) {
-        this.moveLeft();
-      }
-    }, 1000 / 60);
+animate() {
+  this.movementInterval = setInterval(() => {
+    if (!this.dead) {
+      this.moveLeft();
+    }
+  }, 1000 / 60);
 
-    setInterval(() => {
-      if (this.dead) {
-      } else {
-        this.playAnimation(this.IMAGES_WALKING);
-      }
-    }, 200);
-  }
+  this.walkAnimationInterval = setInterval(() => {
+    if (!this.dead) {
+      this.playAnimation(this.IMAGES_WALKING);
+    }
+  }, 200);
+}
+
+
 
   /**
    * Plays the sound when the chicken is hurt.
    * Ensures that the sound is played only once every cooldown period.
    */
   playHurtSound() {
-      if (this.world?.isMuted) return; 
+    if (this.world?.isMuted) return;
     let now = Date.now();
     if (now - this.lastHurtSoundTime > this.hurtSoundCooldown) {
       this.sounds.hurt

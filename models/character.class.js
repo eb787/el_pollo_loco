@@ -95,20 +95,11 @@ class Character extends MovableObject {
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_IDLE);
     this.loadImages(this.IMAGES_LONG_IDLE);
-
-    // Sounds initialisieren
-    this.sounds = {};
-    for (let key in this.AUDIOS) {
-      const [src, volume] = this.AUDIOS[key];
-      const loop = key === "idle";
-      this.sounds[key] = this.createAudio(src, volume, loop);
-      this.registerSound(this.sounds[key]);
-    }
-
+     this.initSounds();
     this.snoreSound = this.sounds.idle;
-
     this.applyGravity();
     this.animate();
+    
   }
 
   /**
@@ -194,7 +185,6 @@ class Character extends MovableObject {
    */
   playWalkSound() {
     if (this.world?.isMuted) return;
-
     let now = Date.now();
     if (now - this.lastWalkSoundTime > this.walkSoundCooldown) {
       this.sounds.walking
@@ -212,14 +202,12 @@ class Character extends MovableObject {
     }
     return; 
   }
-
   if (this.snoreSound.paused) {
     this.snoreSound
       .play()
       .catch((e) => console.warn("Snore sound blocked:", e));
   }
 }
-
 
   stopSnoreSound() {
     if (this.snoreSound && !this.snoreSound.paused) {

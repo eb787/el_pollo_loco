@@ -13,8 +13,6 @@ class DrawableObject {
     bottom: 0,
   };
   
-  
-
   /**
    * Loads a single image into this.img.
    * @param {string} path - The path to the image file.
@@ -40,11 +38,13 @@ class DrawableObject {
    * Registers a sound in the world's global sound list for global control.
    * @param {HTMLAudioElement} sound - The sound to register.
    */
-  registerSound(audio) {
-    if (this.world?.allSounds && !this.world.allSounds.includes(audio)) {
+registerSound(audio) {
+  if (this.world?.allSounds) {
+    if (!this.world.allSounds.includes(audio)) {
       this.world.allSounds.push(audio);
     }
   }
+}
 
   /**
    * This method will be called whenever a new Audio object is created.
@@ -60,6 +60,26 @@ createAudio(src, volume = 1, loop = false) {
   audio.loop = loop;
   this.registerSound(audio); 
   return audio;
+}
+
+ /**
+ * Initializes the sounds defined in AUDIOS and registers them globally.
+ */
+initSounds() {
+  if (this.world && this.world.isMuted) {
+    this.sounds = {};  
+    return;
+  }
+  this.sounds = {}; 
+  if (this.AUDIOS) {
+    for (let key in this.AUDIOS) {
+      const [src, volume] = this.AUDIOS[key];
+      const audio = this.createAudio(src, volume);
+      audio.muted = this.world?.isMuted || false;  
+      this.sounds[key] = audio;
+      this.registerSound(audio);
+    }
+  }
 }
 
   /**
