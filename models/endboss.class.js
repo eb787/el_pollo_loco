@@ -77,7 +77,6 @@ animate() {
       this.stopWalkSound(); 
       return;
     }
-
     if (this.isDead()) {
       this.playAnimation(this.IMAGES_DEAD);
     } else if (this.isHurtByBottle()) {

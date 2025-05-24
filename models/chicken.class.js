@@ -11,12 +11,12 @@ class Chicken extends MovableObject {
   AUDIOS = {
     hurt: ["audio/chicken-crash6.mp3", 0.2],
   };
-  offset = {
-    top: 2,
-    left: 2,
-    right: 2,
-    bottom: 2,
-  };
+ offset = {
+  top: 0,
+  left: -10,
+  right: -10,
+  bottom: 0,
+};
   world;
   dead = false;
   static chickens = [];
@@ -74,15 +74,12 @@ die() {
 
 hitByBottle() {
   console.log("Chicken hit by bottle");
-
   this.energy -= 20;
   if (this.energy < 0) this.energy = 0;
 
   if (this.energy === 0 && !this.dead) {
-    console.log("Chicken has no energy, calling die()");
     this.die();
   }
-
   this.lastHitBottle = new Date().getTime();
 }
 

@@ -1,5 +1,5 @@
 class SmallChicken extends MovableObject {
-  y = 375;
+  y = 370;
   width = 50;
   height = 55;
   IMAGES_WALKING = [
@@ -26,15 +26,24 @@ class SmallChicken extends MovableObject {
    * Creates an instance of the SmallChicken.
    * Initializes the small chicken's properties, randomizes its position, and starts its animation.
    */
-  constructor() {
-    super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
-    this.loadImages(this.IMAGES_WALKING);
+constructor() {
+  super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
+  this.loadImages(this.IMAGES_WALKING);
 
-    this.x = this.getRandomPosition();
-    this.speed = 0.15 + Math.random() * 0.45;
-    SmallChicken.smallChickens.push(this);
-    this.animate();
+  this.x = this.getRandomPosition();
+  this.energy = 20;  
+  this.speed = 0.15 + Math.random() * 0.45;
+  SmallChicken.smallChickens.push(this);
+  this.animate();
+}
+
+hitByBottle() {
+  this.energy -= 20;
+  if (this.energy <= 0 && !this.dead) {
+    this.die();
   }
+}
+
 
   /**
    * Generates a random x-position for the small chicken, ensuring it doesn't overlap with other small chickens.

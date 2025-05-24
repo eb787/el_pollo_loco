@@ -149,29 +149,38 @@ class World {
     this.handleEnemyCollisions();
   }
 
-  /**
-   * Handles collisions of thrown bottles with the Endboss.
-   * Removes bottles that have been broken.
-   */
-  handleBottleHits() {
-    this.throwableObjects.forEach((bottle) => {
-      if (bottle.broken) return;
-      world.level.enemies.forEach((enemy) => {
-        if (enemy.isColliding(bottle)) {
-          enemy.hitByBottle(); // Wird das wirklich aufgerufen?
-          if (enemy instanceof Endboss) {
-            this.endbossStatusBar.setPercentage(enemy.energy);
-          }
-          bottle.startSplash();
-        }
-      });
-    });
 
-    // Entferne zerstörte Flaschen
-    this.throwableObjects = this.throwableObjects.filter(
-      (obj) => !obj.markedForRemoval
-    );
-  }
+
+/**
+ * Checks for collisions between throwable objects (bottles) and enemies.
+ * If a bottle hits an enemy, the enemy takes damage.
+ * If the enemy is the Endboss, the boss status bar is updated accordingly.
+ * The bottle plays its splash animation and is marked for removal after hitting an enemy.
+ * Finally, all bottles marked for removal are filtered out from the throwableObjects array.
+ */
+handleBottleHits() {
+  this.throwableObjects.forEach(bottle => {
+    for (let enemy of world.level.enemies) {
+      if (enemy.isColliding(bottle)) {
+        enemy.hitByBottle();
+
+        if (enemy instanceof Endboss) {
+          this.endbossStatusBar.setPercentage(enemy.energy);
+        }
+
+        bottle.startSplash();
+        bottle.markedForRemoval = true;
+        break; // Prevents a bottle from hitting multiple enemies
+      }
+    }
+  });
+
+  // Remove bottles that are marked for removal from the array
+  this.throwableObjects = this.throwableObjects.filter(
+    obj => !obj.markedForRemoval
+  );
+}
+
 
   /**
    * Handles collision between the character and salsa pickups.
@@ -249,6 +258,7 @@ class World {
       this.statusBar.setPercentage(this.character.energy);
     }
   }
+
 
   /**
    * Handles collision between the character and the Endboss.

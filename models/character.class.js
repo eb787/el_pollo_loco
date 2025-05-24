@@ -80,6 +80,8 @@ class Character extends MovableObject {
   lastSnoreSoundTime = 0;
   snoreSoundCooldown = 6000;
 
+
+
   offset = {
     top: 100,
     left: 15,
@@ -132,14 +134,25 @@ class Character extends MovableObject {
         this.stopSnoreSound();
         this.lastMoveTime = Date.now();
       }
+    if (!this.isOnGround()) {
+      this.world.level.enemies.forEach((enemy) => {
+        if (
+          !enemy.dead &&
+          (enemy instanceof Chicken || enemy instanceof SmallChicken) &&
+          this.isColliding(enemy)
+        ) {
+          this.world.handleChickenCollision(enemy);
+        }
+      });
+    }
 
-      this.idleDuration = Date.now() - this.lastMoveTime;
-      if (this.idleDuration > 5000 && !this.world?.isMuted) {
-        this.playSnoreSound();
-      }
+    this.idleDuration = Date.now() - this.lastMoveTime;
+    if (this.idleDuration > 5000 && !this.world?.isMuted) {
+      this.playSnoreSound();
+    }
 
-      this.world.camera_x = -this.x + 200;
-    }, 1000 / 60);
+    this.world.camera_x = -this.x + 200;
+  }, 1000 / 60);
 
     setInterval(() => {
       if (this.isDead()) {
