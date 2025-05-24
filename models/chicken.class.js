@@ -62,9 +62,8 @@ class Chicken extends MovableObject {
    * Marks the chicken as dead, updates its image, and plays the hurt sound.
    */
 die() {
-  if (this.dead) return; // Falls schon tot, nichts tun
-  console.log("Chicken died");
-
+  if (this.dead) return; 
+ 
   this.dead = true;
   this.loadImage(this.IMAGES_DEAD[0]);
   this.playHurtSound();
@@ -72,8 +71,6 @@ die() {
   clearInterval(this.movementInterval);
   clearInterval(this.walkAnimationInterval);
 }
-
-
 
 hitByBottle() {
   console.log("Chicken hit by bottle");
@@ -88,8 +85,6 @@ hitByBottle() {
 
   this.lastHitBottle = new Date().getTime();
 }
-
-
 
   /**
    * Handles the chicken's movement and animation.
@@ -108,8 +103,6 @@ animate() {
     }
   }, 200);
 }
-
-
 
   /**
    * Plays the sound when the chicken is hurt.

@@ -74,10 +74,6 @@ function startGame() {
   setupMobileControls();
 }
 
-
-
-
-
 /**
  * Toggles fullscreen mode for the game.
  * Called when the fullscreen button is clicked.
@@ -107,30 +103,46 @@ function toggleFullscreen() {
   }
 }
 
-function toggleMute() {
-  isMuted = !isMuted;  
-   world.onMuteChange(isMuted);
-  if (world) {
-    world.isMuted = isMuted; // Update für die Welt
 
-    // Alle existierenden Sounds muten
-    world.allSounds.forEach((audio) => {
-      audio.muted = isMuted;  
-    });
+
+function toggleMute() {
+  isMuted = !isMuted;
+
+  if (typeof world !== 'undefined' && world) {
+    if (typeof world.onMuteChange === 'function') {
+      world.onMuteChange(isMuted);
+    }
+    world.isMuted = isMuted;
+    if (Array.isArray(world.allSounds)) {
+      world.allSounds.forEach((audio) => {
+        audio.muted = isMuted;
+      });
+    }
   }
-  
-  // Falls du andere Audio-Elemente im HTML hast:
+
   document.querySelectorAll("audio").forEach((audio) => {
     audio.muted = isMuted;
   });
 
-  if (backgroundMusic) {
+  if (typeof backgroundMusic !== 'undefined' && backgroundMusic) {
     backgroundMusic.muted = isMuted;
   }
 
-  const muteBtn = document.getElementById("muteBtn");
-  muteBtn.textContent = isMuted ? "🔇 Stumm" : "🔊 Ton an";
+  const muteBtnImg = document.querySelector("#muteBtn img");
+  if (muteBtnImg) {
+    muteBtnImg.src = isMuted ? "./img/sound_off.svg" : "./img/sound_on.svg";
+    muteBtnImg.alt = isMuted ? "mute off" : "mute on";
+  }
 }
+
+// Warten, bis das DOM geladen ist
+window.addEventListener("DOMContentLoaded", () => {
+  const muteBtn = document.getElementById("muteBtn");
+  if (muteBtn) {
+    muteBtn.addEventListener("click", toggleMute);
+  }
+});
+
 
 
 /**
@@ -139,7 +151,11 @@ function toggleMute() {
  */
 window.addEventListener("keydown", (e) => {
   // SPACE oder Pfeiltasten verhindern Standardverhalten (z. B. Scrollen oder Button-Trigger)
-  if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+  if (
+    ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
+      e.code
+    )
+  ) {
     e.preventDefault();
   }
 
@@ -150,7 +166,6 @@ window.addEventListener("keydown", (e) => {
   if (e.keyCode == 32) keyboard.SPACE = true;
   if (e.keyCode == 68) keyboard.D = true;
 });
-
 
 /**
  * Handles keyup events to reset the keys when released.

@@ -95,11 +95,10 @@ class Character extends MovableObject {
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_IDLE);
     this.loadImages(this.IMAGES_LONG_IDLE);
-     this.initSounds();
+    this.initSounds();
     this.snoreSound = this.sounds.idle;
     this.applyGravity();
     this.animate();
-    
   }
 
   /**
@@ -145,9 +144,13 @@ class Character extends MovableObject {
     setInterval(() => {
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
-      } else if (this.isHurt()) {
+        this.stopSnoreSound();
+        return;
+      } if (this.isHurt()) {
         this.playHurtSound();
+        this.stopSnoreSound();
         this.playAnimation(this.IMAGES_HURT);
+        return;
       } else if (this.isAboveGround()) {
         this.playAnimation(this.IMAGES_JUMPING);
       } else {
@@ -195,19 +198,19 @@ class Character extends MovableObject {
   }
 
   playSnoreSound() {
-  if (this.world?.isGameOver || this.world?.isMuted) {
-    if (!this.snoreSound.paused) {
-      this.snoreSound.pause();  
-      this.snoreSound.currentTime = 0;  
+    if (this.world?.isGameOver || this.world?.isMuted) {
+      if (!this.snoreSound.paused) {
+        this.snoreSound.pause();
+        this.snoreSound.currentTime = 0;
+      }
+      return;
     }
-    return; 
+    if (this.snoreSound.paused) {
+      this.snoreSound
+        .play()
+        .catch((e) => console.warn("Snore sound blocked:", e));
+    }
   }
-  if (this.snoreSound.paused) {
-    this.snoreSound
-      .play()
-      .catch((e) => console.warn("Snore sound blocked:", e));
-  }
-}
 
   stopSnoreSound() {
     if (this.snoreSound && !this.snoreSound.paused) {

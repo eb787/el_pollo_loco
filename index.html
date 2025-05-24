@@ -22,7 +22,7 @@
     <script src="models/world.class.js"></script>
     <script src="models/background-object.class.js"></script>
     <script src="models/keyboard.class.js"></script>
-    <script src="models/level.class.js"></script> 
+    <script src="models/level.class.js"></script>
     <script src="models/coins.class.js"></script>
     <script src="models/salsa.class.js"></script>
     <script src="levels/level1.js"></script>
@@ -33,19 +33,22 @@
 <body onload="init()">
     <div id="fullscreen" class="fullscreen">
         <canvas id="canvas" height="480" width="720"></canvas>
-        
+
         <div class="position_divs">
-        <div id="button_left" class="div_rules"> <img src="/img/arrow_back.svg" alt="arrow_back">go</div>
-        <div id="button_right" class="div_rules"> <img src="/img/arrow_forward.svg" alt="arrow_forward">go</div>    
-        <div id="button_jump" class="div_rules"> <img src="/img/space.svg" alt="space">jump</div>
-        <div id="button_throw" class="div_rules"> d = throw</div>
-        <div class="fullscreen-btn" onclick="toggleFullscreen()"> <img src="/img/fullscreen.svg" alt="fullscreen"></div>
-        <button class="div_rules" id="muteBtn" tabindex="-1">🔊 Ton an</button>
+            <div id="button_left" class="div_rules"> <img src="./img/arrow_back.svg" alt="arrow_back">go</div>
+            <div id="button_right" class="div_rules"> <img src="./img/arrow_forward.svg" alt="arrow_forward">go</div>
+            <div id="button_jump" class="div_rules"> <img src="./img/space.svg" alt="space">jump</div>
+            <div id="button_throw" class="div_rules"> d = throw</div>
+            <div class="fullscreen-btn" onclick="toggleFullscreen()"> <img src="./img/fullscreen.svg" alt="fullscreen">
+            </div>
+            <div class="div_rules" id="muteBtn" tabindex="-1">
+                <img src="./img/sound_on.svg" alt="mute on">
+            </div>
         </div>
-        
+
     </div>
-     <button id="restartBtn" class="restartBtn" style="display: none;">Spiel neu starten</button>
-     <a class="div-impressum" href="impressum.html">Impressum</a>
+    <button id="restartBtn" class="restartBtn" style="display: none;">Spiel neu starten</button>
+    <a class="div-impressum" href="impressum.html">Impressum</a>
 
 </body>
 

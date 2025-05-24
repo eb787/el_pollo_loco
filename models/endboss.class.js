@@ -83,15 +83,13 @@ animate() {
     } else if (this.isHurtByBottle()) {
       this.playAnimation(this.IMAGES_HURT);
       this.playHurtSound();
-    } else {
-      let distance = Math.abs(this.x - this.character.x);
+    } else { let distance = Math.abs(this.x - this.character.x);
       if (distance < 600 && distance > 100) {
         this.moveTowardsCharacter(this.character);
         this.playAnimation(this.IMAGES_WALKING);
         this.playWalkSound();
       } else if (distance <= 100) {
         this.playAnimation(this.IMAGES_ATTACK);
-        this.stopWalkSound(); 
       } else {
         this.playAnimation(this.IMAGES_ALERT);
         this.stopWalkSound(); 
@@ -99,7 +97,6 @@ animate() {
     }
   }, 150);
 }
-
 
   /**
    * Moves the Endboss towards the character.
@@ -144,7 +141,6 @@ playWalkSound() {
   if (walkingSound && walkingSound.paused) {
     walkingSound.loop = true; 
     walkingSound.volume = this.AUDIOS.walking[1]; 
-
     if (this.world?.backgroundMusic && !this.world.backgroundMusic.paused) {
       this.world.backgroundMusic.pause();
     }
@@ -165,11 +161,9 @@ stopWalkSound() {
   }
 }
 
-
 onMuteChange(isMuted) {
   if (isMuted) {
     this.stopWalkSound();
   }
 }
-
 }
