@@ -51,6 +51,7 @@ const level1 = new Level(
     new Salsa(300, 300),
     new Salsa(700, 300),
     new Salsa(1200, 300),
+    new Salsa(1400, 300),
     new Salsa(1800, 300),
     new Salsa(2100, 300)
   ]

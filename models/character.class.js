@@ -178,16 +178,12 @@ startAnimationLoop() {
       this.playAnimation(this.IMAGES_DEAD);
       this.stopSnoreSound();
       return;
-    }
-
-    if (this.isHurt()) {
+    } if (this.isHurt()) {
       this.playHurtSound();
       this.stopSnoreSound();
       this.playAnimation(this.IMAGES_HURT);
       return;
-    }
-
-    if (this.isAboveGround()) {
+    } if (this.isAboveGround()) {
       this.playAnimation(this.IMAGES_JUMPING);
     } else if (this.world?.keyboard.RIGHT || this.world?.keyboard.LEFT) {
       this.playAnimation(this.IMAGES_WALKING);
@@ -202,8 +198,6 @@ startAnimationLoop() {
     }
   }, 80);
 }
-
-
 
   /**
    * Plays the hurt sound with cooldown.

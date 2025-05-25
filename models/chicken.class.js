@@ -11,12 +11,12 @@ class Chicken extends MovableObject {
   AUDIOS = {
     hurt: ["audio/chicken-crash6.mp3", 0.2],
   };
- offset = {
-  top: 0,
-  left: -10,
-  right: -10,
-  bottom: 0,
-};
+  offset = {
+    top: 0,
+    left: -10,
+    right: -10,
+    bottom: 0,
+  };
   world;
   dead = false;
   static chickens = [];
@@ -61,45 +61,43 @@ class Chicken extends MovableObject {
   /**
    * Marks the chicken as dead, updates its image, and plays the hurt sound.
    */
-die() {
-  if (this.dead) return; 
- 
-  this.dead = true;
-  this.loadImage(this.IMAGES_DEAD[0]);
-  this.playHurtSound();
-
-  clearInterval(this.movementInterval);
-  clearInterval(this.walkAnimationInterval);
-}
-
-hitByBottle() {
-  console.log("Chicken hit by bottle");
-  this.energy -= 20;
-  if (this.energy < 0) this.energy = 0;
-
-  if (this.energy === 0 && !this.dead) {
-    this.die();
+  die() {
+    if (this.dead) return;
+    this.dead = true;
+    this.loadImage(this.IMAGES_DEAD[0]);
+    this.playHurtSound();
+    this.y += 20;
+    clearInterval(this.movementInterval);
+    clearInterval(this.walkAnimationInterval);
   }
-  this.lastHitBottle = new Date().getTime();
-}
+
+  hitByBottle() {
+    this.energy -= 20;
+    if (this.energy < 0) this.energy = 0;
+
+    if (this.energy === 0 && !this.dead) {
+      this.die();
+    }
+    this.lastHitBottle = new Date().getTime();
+  }
 
   /**
    * Handles the chicken's movement and animation.
    * Makes the chicken move left and play walking animation when alive.
    */
-animate() {
-  this.movementInterval = setInterval(() => {
-    if (!this.dead) {
-      this.moveLeft();
-    }
-  }, 1000 / 60);
+  animate() {
+    this.movementInterval = setInterval(() => {
+      if (!this.dead) {
+        this.moveLeft();
+      }
+    }, 1000 / 60);
 
-  this.walkAnimationInterval = setInterval(() => {
-    if (!this.dead) {
-      this.playAnimation(this.IMAGES_WALKING);
-    }
-  }, 200);
-}
+    this.walkAnimationInterval = setInterval(() => {
+      if (!this.dead) {
+        this.playAnimation(this.IMAGES_WALKING);
+      }
+    }, 200);
+  }
 
   /**
    * Plays the sound when the chicken is hurt.

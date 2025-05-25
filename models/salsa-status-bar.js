@@ -23,6 +23,4 @@ class SalsaStatusBar extends DrawableObject {
     let path = this.IMAGES_BOTTLE[this.resolveImageIndex()];
     this.img = this.imageCache[path];
   }
-
-
 }

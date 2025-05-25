@@ -1,7 +1,3 @@
-/**
- * Represents a salsa bottle collectible item.
- * When collected, it plays a sound and changes its state.
- */
 class Salsa extends MovableObject {
   y = 350;
   width = 50;
@@ -37,8 +33,18 @@ class Salsa extends MovableObject {
     super(); // Automatically loads audio via DrawableObject constructor
     this.loadImages(this.IMAGES_SALSA);
     this.x = x;
-    const imageIndex = Math.floor(Math.random() * this.IMAGES_SALSA.length);
-    this.loadImage(this.IMAGES_SALSA[imageIndex]);
+    this.animate();
+  }
+
+   /**
+   * Handles the animation of the coin.
+   * Cycles through the coin images every 200 milliseconds.
+   */
+  animate() {
+    setInterval(() => {
+      this.currentImage = (this.currentImage + 1) % this.IMAGES_SALSA.length;
+      this.img = this.imageCache[this.IMAGES_SALSA[this.currentImage]];
+    }, 200);
   }
 
 /**

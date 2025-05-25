@@ -83,7 +83,6 @@ class World {
       if (obj instanceof Endboss) {
         obj.character = this.character;
       }
-
       if (typeof obj.initSounds === "function") {
         obj.initSounds();
       }
@@ -149,8 +148,6 @@ class World {
     this.handleEnemyCollisions();
   }
 
-
-
 /**
  * Checks for collisions between throwable objects (bottles) and enemies.
  * If a bottle hits an enemy, the enemy takes damage.
@@ -177,7 +174,6 @@ handleBottleHits() {
     obj => !obj.markedForRemoval
   );
 }
-
 
   /**
    * Handles collision between the character and salsa pickups.
@@ -256,7 +252,6 @@ handleBottleHits() {
     }
   }
 
-
   /**
    * Handles collision between the character and the Endboss.
    * Prevents repeated damage within a short cooldown.
@@ -321,10 +316,7 @@ handleBottleHits() {
     if (mo.otherDirection) {
       this.flipImage(mo);
     }
-
     mo.draw(this.ctx);
-    mo.drawFrame(this.ctx);
-
     if (mo.otherDirection) {
       this.flipImageBack(mo);
     }
@@ -425,7 +417,7 @@ handleBottleHits() {
 
         setTimeout(() => {
           this.showWinScreen();
-        }, 1000);
+        }, 700);
       }
     }, 200);
     this.intervalIds.push(interval);

@@ -111,13 +111,11 @@ function toggleFullscreen() {
   }
 }
 
-
-
 function toggleMute() {
   isMuted = !isMuted;
 
-  if (typeof world !== 'undefined' && world) {
-    if (typeof world.onMuteChange === 'function') {
+  if (typeof world !== "undefined" && world) {
+    if (typeof world.onMuteChange === "function") {
       world.onMuteChange(isMuted);
     }
     world.isMuted = isMuted;
@@ -127,15 +125,12 @@ function toggleMute() {
       });
     }
   }
-
   document.querySelectorAll("audio").forEach((audio) => {
     audio.muted = isMuted;
   });
-
-  if (typeof backgroundMusic !== 'undefined' && backgroundMusic) {
+  if (typeof backgroundMusic !== "undefined" && backgroundMusic) {
     backgroundMusic.muted = isMuted;
   }
-
   const muteBtnImg = document.querySelector("#muteBtn img");
   if (muteBtnImg) {
     muteBtnImg.src = isMuted ? "./img/sound_off.svg" : "./img/sound_on.svg";
@@ -143,7 +138,6 @@ function toggleMute() {
   }
 }
 
-// Warten, bis das DOM geladen ist
 window.addEventListener("DOMContentLoaded", () => {
   const muteBtn = document.getElementById("muteBtn");
   if (muteBtn) {

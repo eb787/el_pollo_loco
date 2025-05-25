@@ -6,7 +6,8 @@ class MovableObject extends DrawableObject {
   coins = 0;
   salsa = 0;
   lastHit = 0;
-  lastHitBottle = 0;
+  lastHitBottle = 1000;
+  hitCooldown = 300;
   offset = {
     top: 20,
     left: 20,
@@ -65,12 +66,6 @@ isColliding(mo) {
     a_top < b_bottom
   );
 }
-
-
-
-
-
-
   /**
    * Marks the object as dead and stops its movement.
    * @memberof MovableObject
@@ -96,20 +91,24 @@ isColliding(mo) {
     this.salsa += 1;
   }
 
-  /**
-   * Reduces the object's energy by 5 when it is hit by an enemy or object.
-   * Updates the last hit timestamp.
-   * @memberof MovableObject
-   */
-  hit() {
+/**
+ * Reduces the object's energy by 5 when it is hit,
+ * but only if enough time has passed since the last hit.
+ * Prevents taking damage too frequently.
+ * @memberof MovableObject
+ */
+hit() {
+  const now = new Date().getTime();
+  if (now - this.lastHit > this.hitCooldown) {
     this.energy -= 5;
     if (this.energy < 0) {
       this.energy = 0;
-    } else {
-      this.lastHit = new Date().getTime();
-      this.lastHitBottle = new Date().getTime();
     }
+    this.lastHit = now;
+    this.lastHitBottle = now;
   }
+}
+
 
   /**
    * Reduces the object's energy by 20 when hit by the Endboss.

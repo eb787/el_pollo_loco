@@ -44,7 +44,6 @@ hitByBottle() {
   }
 }
 
-
   /**
    * Generates a random x-position for the small chicken, ensuring it doesn't overlap with other small chickens.
    * @returns {number} - The random x-coordinate for the small chicken.
@@ -75,6 +74,7 @@ hitByBottle() {
     super.die();
     this.loadImage(this.IMAGES_DEAD[0]);
     this.playHurtSound();
+    this.y += 10;
   }
 
   /**

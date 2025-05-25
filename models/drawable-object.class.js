@@ -95,41 +95,6 @@ initSounds() {
   }
 
   /**
-   * Draws the bounding box and offset box for debugging purposes.
-   * @param {CanvasRenderingContext2D} ctx - The canvas 2D context.
-   */
-  drawFrame(ctx) {
-    if (
-      this instanceof Character ||
-      this instanceof Chicken ||
-      this instanceof SmallChicken ||
-      this instanceof Endboss ||
-      this instanceof Coins ||
-      this instanceof Salsa ||
-      this instanceof ThrowableObject
-    ) {
-      // Outer frame
-      ctx.beginPath();
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = "blue";
-      ctx.rect(this.x, this.y, this.width, this.height);
-      ctx.stroke();
-
-      // Inner frame with offset
-      ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "red";
-      ctx.rect(
-        this.x + this.offset.left,
-        this.y + this.offset.top,
-        this.width - this.offset.left - this.offset.right,
-        this.height - this.offset.top - this.offset.bottom
-      );
-      ctx.stroke();
-    }
-  }
-
-  /**
    * Resolves the image index based on a percentage (e.g. for status bars).
    * Requires `this.percentage` to be set externally.
    * @returns {number} The image index based on the percentage.
