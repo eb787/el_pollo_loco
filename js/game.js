@@ -38,6 +38,7 @@ function bindReloadButton() {
  * Draws the start screen image on the canvas and adds the "Click to Start" text.
  */
 function drawStartScreen() {
+  initLevel1()
   ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas before drawing
   ctx.drawImage(startScreenImage, 0, 0, canvas.width, canvas.height); // Draw the background image
   ctx.font = "30px Comic Sans MS";
