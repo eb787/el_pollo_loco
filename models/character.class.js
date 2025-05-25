@@ -67,6 +67,7 @@ class Character extends MovableObject {
     jumping: ["audio/character_jump.mp3", 0.2],
     hurt: ["audio/hurt.mp3", 0.1],
     idle: ["audio/snore_character.mp3", 0.1],
+    suprise: ["audio/surprise-sound-effect.mp3", 0.2],
   };
 
   lastMoveTime = Date.now();
@@ -79,7 +80,7 @@ class Character extends MovableObject {
   walkSoundCooldown = 10;
   lastSnoreSoundTime = 0;
   snoreSoundCooldown = 6000;
-
+  hasPlayedSurpriseSound = false;
 
 
   offset = {
@@ -103,47 +104,48 @@ class Character extends MovableObject {
     this.animate();
   }
 
+  animate() {
+  this.startMovementLoop();
+  this.startAnimationLoop();
+}
+
   /**
    * Starts character movement and animation intervals.
    * Handles input-based actions and animation frame switching.
    */
-  animate() {
-    setInterval(() => {
-      if (this.world?.isGameOver) return;
+ startMovementLoop() {
+  setInterval(() => {
+    if (this.world?.isGameOver) return;
 
-      if (this.world?.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-        this.moveRight();
-        this.otherDirection = false;
-        this.lastMoveTime = Date.now();
-        this.stopSnoreSound();
-        if (this.isOnGround()) this.playWalkSound();
-      }
-      if (this.world?.keyboard.LEFT && this.x > 0) {
-        this.moveLeft();
-        this.otherDirection = true;
-        this.lastMoveTime = Date.now();
-        this.stopSnoreSound();
-        if (this.isOnGround()) this.playWalkSound();
-      }
-      if (this.world?.keyboard.SPACE && !this.isAboveGround()) {
-        this.jump();
-        this.stopSnoreSound();
-        this.lastMoveTime = Date.now();
-      }
-      if (this.world?.keyboard.D) {
-        this.stopSnoreSound();
-        this.lastMoveTime = Date.now();
-      }
-    if (!this.isOnGround()) {
-      this.world.level.enemies.forEach((enemy) => {
-        if (
-          !enemy.dead &&
-          (enemy instanceof Chicken || enemy instanceof SmallChicken) &&
-          this.isColliding(enemy)
-        ) {
-          this.world.handleChickenCollision(enemy);
-        }
-      });
+    if (this.world?.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
+      this.moveRight();
+      this.otherDirection = false;
+      this.lastMoveTime = Date.now();
+      this.stopSnoreSound();
+      if (this.isOnGround()) this.playWalkSound();
+    }
+    if (this.world?.keyboard.LEFT && this.x > 0) {
+      this.moveLeft();
+      this.otherDirection = true;
+      this.lastMoveTime = Date.now();
+      this.stopSnoreSound();
+      if (this.isOnGround()) this.playWalkSound();
+    }
+    if (this.world?.keyboard.SPACE && !this.isAboveGround()) {
+      this.jump();
+      this.stopSnoreSound();
+      this.lastMoveTime = Date.now();
+    }
+    if (this.world?.keyboard.D) {
+      this.stopSnoreSound();
+      this.lastMoveTime = Date.now();
+    }
+    // Surprise Sound bei x = 2000
+    if (!this.hasPlayedSurpriseSound && this.x >= 1900 && !this.world?.isMuted) {
+      this.sounds.suprise
+        .play()
+        .catch((e) => console.warn("Surprise sound blocked:", e));
+      this.hasPlayedSurpriseSound = true;
     }
 
     this.idleDuration = Date.now() - this.lastMoveTime;
@@ -153,34 +155,55 @@ class Character extends MovableObject {
 
     this.world.camera_x = -this.x + 200;
   }, 1000 / 60);
+}
 
-    setInterval(() => {
-      if (this.isDead()) {
-        this.playAnimation(this.IMAGES_DEAD);
-        this.stopSnoreSound();
-        return;
-      } if (this.isHurt()) {
-        this.playHurtSound();
-        this.stopSnoreSound();
-        this.playAnimation(this.IMAGES_HURT);
-        return;
-      } else if (this.isAboveGround()) {
-        this.playAnimation(this.IMAGES_JUMPING);
+
+/**
+ * Starts a recurring animation loop that updates the character's visual state.
+ * 
+ * This loop checks the character's status every 80ms and plays the appropriate
+ * animation based on its current condition:
+ * 
+ * - If the character is dead, it plays the death animation and stops snoring.
+ * - If the character is hurt, it plays the hurt animation, sound, and stops snoring.
+ * - If the character is jumping (not on the ground), it plays the jumping animation.
+ * - If the character is moving left or right, it plays the walking animation.
+ * - If the character is idle:
+ *   - For longer than 5 seconds, it plays the long idle animation and snore sound.
+ *   - Otherwise, it plays the regular idle animation.
+ */
+startAnimationLoop() {
+  setInterval(() => {
+    if (this.isDead()) {
+      this.playAnimation(this.IMAGES_DEAD);
+      this.stopSnoreSound();
+      return;
+    }
+
+    if (this.isHurt()) {
+      this.playHurtSound();
+      this.stopSnoreSound();
+      this.playAnimation(this.IMAGES_HURT);
+      return;
+    }
+
+    if (this.isAboveGround()) {
+      this.playAnimation(this.IMAGES_JUMPING);
+    } else if (this.world?.keyboard.RIGHT || this.world?.keyboard.LEFT) {
+      this.playAnimation(this.IMAGES_WALKING);
+    } else {
+      this.idleDuration = Date.now() - this.lastMoveTime;
+      if (this.idleDuration > 5000) {
+        this.playAnimation(this.IMAGES_LONG_IDLE);
+        this.playSnoreSound();
       } else {
-        if (this.world?.keyboard.RIGHT || this.world?.keyboard.LEFT) {
-          this.playAnimation(this.IMAGES_WALKING);
-        } else {
-          this.idleDuration = Date.now() - this.lastMoveTime;
-          if (this.idleDuration > 5000) {
-            this.playAnimation(this.IMAGES_LONG_IDLE);
-            this.playSnoreSound();
-          } else {
-            this.playAnimation(this.IMAGES_IDLE);
-          }
-        }
+        this.playAnimation(this.IMAGES_IDLE);
       }
-    }, 80);
-  }
+    }
+  }, 80);
+}
+
+
 
   /**
    * Plays the hurt sound with cooldown.

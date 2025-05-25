@@ -54,6 +54,27 @@ canvas {
     z-index: 1000;
 }
 
+.div_rules_hover{
+     display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    padding: 15px;
+    background-color: #ffcc00;
+    color: #000;
+    border: 2px solid #000;
+    border-radius: 100px;
+    box-shadow: 3px 3px 0px #000;
+    z-index: 1000;
+}
+
+.div_rules_hover:hover{
+    background-color: #ffe066;
+    box-shadow: 1px 1px 0px #000;
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
 .fullscreen-btn {
     padding: 15px;
     font-size: 16px;

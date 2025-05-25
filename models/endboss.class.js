@@ -83,7 +83,7 @@ animate() {
       this.playAnimation(this.IMAGES_HURT);
       this.playHurtSound();
     } else { let distance = Math.abs(this.x - this.character.x);
-      if (distance < 600 && distance > 100) {
+      if (distance < 450 && distance > 100) {
         this.moveTowardsCharacter(this.character);
         this.playAnimation(this.IMAGES_WALKING);
         this.playWalkSound();

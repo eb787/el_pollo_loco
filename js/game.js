@@ -25,13 +25,21 @@ function init() {
   document.getElementById("muteBtn").addEventListener("click", toggleMute);
 }
 
+function bindReloadButton() {
+  const reloadBtn = document.getElementById("button_reload");
+  if (reloadBtn) {
+    reloadBtn.addEventListener("click", () => {
+      location.reload();
+    });
+  }
+}
+
 /**
  * Draws the start screen image on the canvas and adds the "Click to Start" text.
  */
 function drawStartScreen() {
   ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas before drawing
   ctx.drawImage(startScreenImage, 0, 0, canvas.width, canvas.height); // Draw the background image
-
   ctx.font = "30px Comic Sans MS";
   ctx.fillStyle = "white";
   ctx.textAlign = "center";
@@ -61,7 +69,6 @@ function startGameOnce() {
 function startGame() {
   world = new World(canvas, keyboard);
   world.isMuted = isMuted;
-
   world.backgroundMusic = new Audio("audio/guitar.mp3");
   world.backgroundMusic.loop = true;
   world.backgroundMusic.volume = 0.1;
@@ -72,6 +79,7 @@ function startGame() {
   });
 
   setupMobileControls();
+  bindReloadButton();
 }
 
 /**
@@ -142,8 +150,6 @@ window.addEventListener("DOMContentLoaded", () => {
     muteBtn.addEventListener("click", toggleMute);
   }
 });
-
-
 
 /**
  * Handles keydown events to track which keys are pressed.

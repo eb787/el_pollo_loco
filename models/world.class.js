@@ -163,18 +163,15 @@ handleBottleHits() {
     for (let enemy of world.level.enemies) {
       if (enemy.isColliding(bottle)) {
         enemy.hitByBottle();
-
         if (enemy instanceof Endboss) {
           this.endbossStatusBar.setPercentage(enemy.energy);
         }
-
         bottle.startSplash();
         bottle.markedForRemoval = true;
         break; // Prevents a bottle from hitting multiple enemies
       }
     }
   });
-
   // Remove bottles that are marked for removal from the array
   this.throwableObjects = this.throwableObjects.filter(
     obj => !obj.markedForRemoval
