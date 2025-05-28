@@ -32,6 +32,7 @@ class Salsa extends MovableObject {
   constructor(x) {
     super(); // Automatically loads audio via DrawableObject constructor
     this.loadImages(this.IMAGES_SALSA);
+     this.loadImage(this.IMAGES_SALSA[0]);
     this.x = x;
     this.animate();
   }

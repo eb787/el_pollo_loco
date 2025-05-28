@@ -38,7 +38,7 @@ function bindReloadButton() {
  * Draws the start screen image on the canvas and adds the "Click to Start" text.
  */
 function drawStartScreen() {
-  initLevel1()
+
   ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas before drawing
   ctx.drawImage(startScreenImage, 0, 0, canvas.width, canvas.height); // Draw the background image
   ctx.font = "30px Comic Sans MS";
@@ -68,6 +68,7 @@ function startGameOnce() {
  * This function is called after the user clicks on the start screen.
  */
 function startGame() {
+    initLevel1()
   world = new World(canvas, keyboard);
   world.isMuted = isMuted;
   world.backgroundMusic = new Audio("audio/guitar.mp3");
@@ -81,35 +82,6 @@ function startGame() {
 
   setupMobileControls();
   bindReloadButton();
-}
-
-/**
- * Toggles fullscreen mode for the game.
- * Called when the fullscreen button is clicked.
- */
-function toggleFullscreen() {
-  const fullscreenElement = document.getElementById("fullscreen");
-  // Check if the document is currently in fullscreen mode
-  if (!document.fullscreenElement) {
-    // Enter fullscreen for different browsers
-    if (fullscreenElement.requestFullscreen) {
-      fullscreenElement.requestFullscreen();
-    } else if (fullscreenElement.mozRequestFullScreen) {
-      // Firefox
-      fullscreenElement.mozRequestFullScreen();
-    } else if (fullscreenElement.webkitRequestFullscreen) {
-      // Chrome, Safari, Opera
-      fullscreenElement.webkitRequestFullscreen();
-    } else if (fullscreenElement.msRequestFullscreen) {
-      // IE/Edge
-      fullscreenElement.msRequestFullscreen();
-    }
-  } else {
-    // Exit fullscreen mode if already in fullscreen
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  }
 }
 
 function toggleMute() {
@@ -151,7 +123,6 @@ window.addEventListener("DOMContentLoaded", () => {
  * This function maps key codes to keyboard actions.
  */
 window.addEventListener("keydown", (e) => {
-  // SPACE oder Pfeiltasten verhindern Standardverhalten (z. B. Scrollen oder Button-Trigger)
   if (
     ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
       e.code
@@ -187,7 +158,6 @@ function setupMobileControls() {
   const jumpButton = document.getElementById("button_jump");
   const throwButton = document.getElementById("button_throw");
 
-  // Touchstart = gedrückt halten
   leftButton.addEventListener("touchstart", (e) => {
     e.preventDefault();
     keyboard.LEFT = true;
