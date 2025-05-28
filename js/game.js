@@ -26,13 +26,23 @@ function init() {
 }
 
 function bindReloadButton() {
-  const reloadBtn = document.getElementById("button_reload");
-  if (reloadBtn) {
-    reloadBtn.addEventListener("click", () => {
+  const buttons = ["button_reload", "button_reload_mobile"];
+
+  buttons.forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+
+    btn.addEventListener("click", () => {
       location.reload();
     });
-  }
+
+    btn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      location.reload();
+    });
+  });
 }
+
 
 /**
  * Draws the start screen image on the canvas and adds the "Click to Start" text.
@@ -84,39 +94,90 @@ function startGame() {
   bindReloadButton();
 }
 
+/**
+ * Toggles the mute status.
+ * Updates world sounds, all audio elements, and mute icons accordingly.
+ */
 function toggleMute() {
   isMuted = !isMuted;
+  updateWorldSounds(isMuted);
+  updateAllAudioElements(isMuted);
+  updateMuteIcons(isMuted);
+}
 
+/**
+ * Updates the mute state of sounds related to the game world.
+ * Calls world's mute change handler if it exists,
+ * sets mute state on all sounds in the world, and on background music.
+ * 
+ * @param {boolean} muted - Whether sounds should be muted or unmuted.
+ */
+function updateWorldSounds(muted) {
   if (typeof world !== "undefined" && world) {
     if (typeof world.onMuteChange === "function") {
-      world.onMuteChange(isMuted);
+      world.onMuteChange(muted);
     }
-    world.isMuted = isMuted;
+    world.isMuted = muted;
+
     if (Array.isArray(world.allSounds)) {
-      world.allSounds.forEach((audio) => {
-        audio.muted = isMuted;
+      world.allSounds.forEach(audio => {
+        audio.muted = muted;
       });
     }
   }
-  document.querySelectorAll("audio").forEach((audio) => {
-    audio.muted = isMuted;
-  });
+
   if (typeof backgroundMusic !== "undefined" && backgroundMusic) {
-    backgroundMusic.muted = isMuted;
-  }
-  const muteBtnImg = document.querySelector("#muteBtn img");
-  if (muteBtnImg) {
-    muteBtnImg.src = isMuted ? "./img/sound_off.svg" : "./img/sound_on.svg";
-    muteBtnImg.alt = isMuted ? "mute off" : "mute on";
+    backgroundMusic.muted = muted;
   }
 }
+
+/**
+ * Updates the mute state for all <audio> elements on the page.
+ * 
+ * @param {boolean} muted - Whether audio elements should be muted or unmuted.
+ */
+function updateAllAudioElements(muted) {
+  document.querySelectorAll("audio").forEach(audio => {
+    audio.muted = muted;
+  });
+}
+
+/**
+ * Updates the mute/unmute icons for both desktop and mobile mute buttons.
+ * Changes the image source and alt text based on mute state.
+ * 
+ * @param {boolean} muted - Whether the mute icons should show muted or unmuted state.
+ */
+function updateMuteIcons(muted) {
+  const muteBtnImg = document.querySelector("#muteBtn img");
+  const muteBtnImgMobile = document.querySelector("#muteBtn_mobile img");
+
+  const newSrc = muted ? "./img/sound_off.svg" : "./img/sound_on.svg";
+  const newAlt = muted ? "mute off" : "mute on";
+
+  if (muteBtnImg) {
+    muteBtnImg.src = newSrc;
+    muteBtnImg.alt = newAlt;
+  }
+  if (muteBtnImgMobile) {
+    muteBtnImgMobile.src = newSrc;
+    muteBtnImgMobile.alt = newAlt;
+  }
+}
+
 
 window.addEventListener("DOMContentLoaded", () => {
   const muteBtn = document.getElementById("muteBtn");
   if (muteBtn) {
     muteBtn.addEventListener("click", toggleMute);
   }
+
+  const muteBtnMobile = document.getElementById("muteBtn_mobile");
+  if (muteBtnMobile) {
+    muteBtnMobile.addEventListener("click", toggleMute);
+  }
 });
+
 
 /**
  * Handles keydown events to track which keys are pressed.
@@ -153,43 +214,35 @@ window.addEventListener("keyup", (e) => {
 });
 
 function setupMobileControls() {
-  const leftButton = document.getElementById("button_left");
-  const rightButton = document.getElementById("button_right");
-  const jumpButton = document.getElementById("button_jump");
-  const throwButton = document.getElementById("button_throw");
+  const buttons = [
+    { el: "button_left", key: "LEFT" },
+    { el: "button_right", key: "RIGHT" },
+    { el: "button_jump", key: "SPACE" },
+    { el: "button_throw", key: "D" },
+    { el: "button_left_mobile", key: "LEFT" },
+    { el: "button_right_mobile", key: "RIGHT" },
+    { el: "button_jump_mobile", key: "SPACE" },
+    { el: "button_throw_mobile", key: "D" },
+  ];
 
-  leftButton.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    keyboard.LEFT = true;
-  });
-  rightButton.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    keyboard.RIGHT = true;
-  });
-  jumpButton.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    keyboard.SPACE = true;
-  });
-  throwButton.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    keyboard.D = true;
-  });
+  buttons.forEach(({ el, key }) => {
+    const button = document.getElementById(el);
+    if (!button) return; // Falls Button nicht existiert
 
-  // Touchend = loslassen
-  leftButton.addEventListener("touchend", (e) => {
-    e.preventDefault();
-    keyboard.LEFT = false;
-  });
-  rightButton.addEventListener("touchend", (e) => {
-    e.preventDefault();
-    keyboard.RIGHT = false;
-  });
-  jumpButton.addEventListener("touchend", (e) => {
-    e.preventDefault();
-    keyboard.SPACE = false;
-  });
-  throwButton.addEventListener("touchend", (e) => {
-    e.preventDefault();
-    keyboard.D = false;
+    button.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      keyboard[key] = true;
+    });
+
+    button.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      keyboard[key] = false;
+    });
+
+    // Optional: Für bessere UX auch touchcancel behandeln
+    button.addEventListener("touchcancel", (e) => {
+      e.preventDefault();
+      keyboard[key] = false;
+    });
   });
 }
