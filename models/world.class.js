@@ -355,6 +355,7 @@ class World {
     return id;
   }
 
+
   /**
    * Clears all stored intervals to stop repeating functions.
    */
