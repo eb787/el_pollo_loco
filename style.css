@@ -148,13 +148,13 @@ canvas {
     }
 }
 
-@media (max-height: 750px) {
+@media (max-height: 600px) {
     .div-impressum {
         display: none
     }
 }
 
-@media (max-height: 700px) {
+@media (max-height: 650px) {
     .div_rules {
         font-size: 13px;
         padding: 10px;
