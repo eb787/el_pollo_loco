@@ -12,7 +12,7 @@ class DrawableObject {
     right: 0,
     bottom: 0,
   };
-  
+
   /**
    * Loads a single image into this.img.
    * @param {string} path - The path to the image file.
@@ -34,53 +34,53 @@ class DrawableObject {
     });
   }
 
-   /**
+  /**
    * Registers a sound in the world's global sound list for global control.
    * @param {HTMLAudioElement} sound - The sound to register.
    */
-registerSound(audio) {
-  if (this.world?.allSounds) {
-    if (!this.world.allSounds.includes(audio)) {
-      this.world.allSounds.push(audio);
+  registerSound(audio) {
+    if (this.world?.allSounds) {
+      if (!this.world.allSounds.includes(audio)) {
+        this.world.allSounds.push(audio);
+      }
     }
   }
-}
 
   /**
    * This method will be called whenever a new Audio object is created.
    * It will automatically register the sound and return it.
-   * 
+   *
    * @param {string} path - The file path of the sound to create.
    * @param {number} [volume=0.2] - The volume level of the audio (default is 0.2).
    * @returns {HTMLAudioElement} The created Audio object.
    */
-createAudio(src, volume = 1, loop = false) {
-  const audio = new Audio(src);
-  audio.volume = volume;
-  audio.loop = loop;
-  this.registerSound(audio); 
-  return audio;
-}
-
- /**
- * Initializes the sounds defined in AUDIOS and registers them globally.
- */
-initSounds() {
-  if (this.world && this.world.isMuted) {
-    this.sounds = {};  
-    return;
+  createAudio(src, volume = 1, loop = false) {
+    const audio = new Audio(src);
+    audio.volume = volume;
+    audio.loop = loop;
+    this.registerSound(audio);
+    return audio;
   }
-  this.sounds = {}; 
-  if (this.AUDIOS) {
-    for (let key in this.AUDIOS) {
-      const [src, volume] = this.AUDIOS[key];
-      const audio = this.createAudio(src, volume);
-      audio.muted = this.world?.isMuted || false;  
-      this.sounds[key] = audio;
-      this.registerSound(audio);
+
+  /**
+   * Initializes the sounds defined in AUDIOS and registers them globally.
+   */
+  initSounds() {
+    if (this.world && this.world.isMuted) {
+      this.sounds = {};
+      return;
+    }
+    this.sounds = {};
+    if (this.AUDIOS) {
+      for (let key in this.AUDIOS) {
+        const [src, volume] = this.AUDIOS[key];
+        const audio = this.createAudio(src, volume);
+        audio.muted = this.world?.isMuted || false;
+        this.sounds[key] = audio;
+        this.registerSound(audio);
+      }
     }
   }
-}
 
   /**
    * Draws the current image of this object on the canvas.

@@ -5,11 +5,11 @@ let backgroundMusic;
 let keyboard = new Keyboard();
 let startScreenImage = new Image();
 startScreenImage.src = "img/9_intro_outro_screens/start/startscreen_1.png";
-let isMuted = false; // Variable to track mute state
+let isMuted = false;
 
 /**
- * Initializes the game, loading the start screen and setting up the click listener.
- * Called on page load by `onload="init()"` in HTML.
+ * Called on page load.
+ * Initializes the canvas, draws the start screen, and sets up event listeners.
  */
 function init() {
   canvas = document.getElementById("canvas");
@@ -25,32 +25,12 @@ function init() {
   document.getElementById("muteBtn").addEventListener("click", toggleMute);
 }
 
-function bindReloadButton() {
-  const buttons = ["button_reload", "button_reload_mobile"];
-
-  buttons.forEach(id => {
-    const btn = document.getElementById(id);
-    if (!btn) return;
-
-    btn.addEventListener("click", () => {
-      location.reload();
-    });
-
-    btn.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      location.reload();
-    });
-  });
-}
-
-
 /**
- * Draws the start screen image on the canvas and adds the "Click to Start" text.
+ * Draws the start screen image and a "Click to Start" prompt.
  */
 function drawStartScreen() {
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas before drawing
-  ctx.drawImage(startScreenImage, 0, 0, canvas.width, canvas.height); // Draw the background image
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(startScreenImage, 0, 0, canvas.width, canvas.height);
   ctx.font = "30px Comic Sans MS";
   ctx.fillStyle = "white";
   ctx.textAlign = "center";
@@ -58,45 +38,57 @@ function drawStartScreen() {
 }
 
 /**
- * Sets up the click event listener on the canvas to start the game once clicked.
+ * Sets up a click listener on the canvas to start the game.
  */
 function setupStartListener() {
   canvas.addEventListener("click", startGameOnce);
 }
 
 /**
- * Starts the game when the user clicks on the canvas.
- * Removes the click listener after the first click.
+ * Starts the game on first click, then removes the click listener to prevent multiple starts.
  */
 function startGameOnce() {
-  canvas.removeEventListener("click", startGameOnce); // Remove the click listener after the first click
-  startGame(); // Initialize the game
+  canvas.removeEventListener("click", startGameOnce);
+  startGame();
 }
 
 /**
- * Initializes the game world and character.
- * This function is called after the user clicks on the start screen.
+ * Initializes the game world, background music, mobile controls, and reload buttons.
  */
 function startGame() {
-    initLevel1()
+  initLevel1();
   world = new World(canvas, keyboard);
   world.isMuted = isMuted;
   world.backgroundMusic = new Audio("audio/guitar.mp3");
   world.backgroundMusic.loop = true;
   world.backgroundMusic.volume = 0.1;
   world.backgroundMusic.muted = isMuted;
-
   world.backgroundMusic.play().catch((error) => {
-    console.warn("Autoplay verhindert:", error);
+    console.warn("Autoplay prevented:", error);
   });
-
   setupMobileControls();
   bindReloadButton();
 }
 
 /**
- * Toggles the mute status.
- * Updates world sounds, all audio elements, and mute icons accordingly.
+ * Adds event listeners to reload buttons for desktop and mobile.
+ */
+function bindReloadButton() {
+  const buttons = ["button_reload", "button_reload_mobile"];
+  buttons.forEach((id) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+
+    btn.addEventListener("click", () => location.reload());
+    btn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      location.reload();
+    });
+  });
+}
+
+/**
+ * Toggles the mute state for all game sounds and UI elements.
  */
 function toggleMute() {
   isMuted = !isMuted;
@@ -106,47 +98,44 @@ function toggleMute() {
 }
 
 /**
- * Updates the mute state of sounds related to the game world.
- * Calls world's mute change handler if it exists,
- * sets mute state on all sounds in the world, and on background music.
+ * Updates the mute state of all sounds within the game world.
  * 
- * @param {boolean} muted - Whether sounds should be muted or unmuted.
+ * @param {boolean} muted - Whether to mute or unmute the sounds.
  */
 function updateWorldSounds(muted) {
-  if (typeof world !== "undefined" && world) {
+  if (world) {
     if (typeof world.onMuteChange === "function") {
       world.onMuteChange(muted);
     }
     world.isMuted = muted;
 
     if (Array.isArray(world.allSounds)) {
-      world.allSounds.forEach(audio => {
+      world.allSounds.forEach((audio) => {
         audio.muted = muted;
       });
     }
   }
 
-  if (typeof backgroundMusic !== "undefined" && backgroundMusic) {
+  if (backgroundMusic) {
     backgroundMusic.muted = muted;
   }
 }
 
 /**
- * Updates the mute state for all <audio> elements on the page.
+ * Mutes or unmutes all <audio> elements on the page.
  * 
- * @param {boolean} muted - Whether audio elements should be muted or unmuted.
+ * @param {boolean} muted - Whether to mute all audio elements.
  */
 function updateAllAudioElements(muted) {
-  document.querySelectorAll("audio").forEach(audio => {
+  document.querySelectorAll("audio").forEach((audio) => {
     audio.muted = muted;
   });
 }
 
 /**
- * Updates the mute/unmute icons for both desktop and mobile mute buttons.
- * Changes the image source and alt text based on mute state.
+ * Updates the mute/unmute icons for desktop and mobile mute buttons.
  * 
- * @param {boolean} muted - Whether the mute icons should show muted or unmuted state.
+ * @param {boolean} muted - If true, shows the muted icon; otherwise, the unmuted icon.
  */
 function updateMuteIcons(muted) {
   const muteBtnImg = document.querySelector("#muteBtn img");
@@ -165,33 +154,26 @@ function updateMuteIcons(muted) {
   }
 }
 
-
+/**
+ * Adds click listeners for mute buttons on both desktop and mobile.
+ */
 window.addEventListener("DOMContentLoaded", () => {
   const muteBtn = document.getElementById("muteBtn");
-  if (muteBtn) {
-    muteBtn.addEventListener("click", toggleMute);
-  }
+  if (muteBtn) muteBtn.addEventListener("click", toggleMute);
 
   const muteBtnMobile = document.getElementById("muteBtn_mobile");
-  if (muteBtnMobile) {
-    muteBtnMobile.addEventListener("click", toggleMute);
-  }
+  if (muteBtnMobile) muteBtnMobile.addEventListener("click", toggleMute);
 });
 
-
 /**
- * Handles keydown events to track which keys are pressed.
- * This function maps key codes to keyboard actions.
+ * Handles keydown events and updates the keyboard object state accordingly.
  */
 window.addEventListener("keydown", (e) => {
   if (
-    ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
-      e.code
-    )
+    ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)
   ) {
     e.preventDefault();
   }
-
   if (e.keyCode == 39) keyboard.RIGHT = true;
   if (e.keyCode == 37) keyboard.LEFT = true;
   if (e.keyCode == 38) keyboard.UP = true;
@@ -201,8 +183,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 /**
- * Handles keyup events to reset the keys when released.
- * This function clears the key actions once the key is released.
+ * Handles keyup events and resets the keyboard object state accordingly.
  */
 window.addEventListener("keyup", (e) => {
   if (e.keyCode == 39) keyboard.RIGHT = false;
@@ -213,6 +194,10 @@ window.addEventListener("keyup", (e) => {
   if (e.keyCode == 68) keyboard.D = false;
 });
 
+/**
+ * Sets up touch event listeners for mobile control buttons,
+ * updating the keyboard state on touchstart and touchend.
+ */
 function setupMobileControls() {
   const buttons = [
     { el: "button_left", key: "LEFT" },
@@ -227,7 +212,7 @@ function setupMobileControls() {
 
   buttons.forEach(({ el, key }) => {
     const button = document.getElementById(el);
-    if (!button) return; // Falls Button nicht existiert
+    if (!button) return;
 
     button.addEventListener("touchstart", (e) => {
       e.preventDefault();
@@ -239,7 +224,6 @@ function setupMobileControls() {
       keyboard[key] = false;
     });
 
-    // Optional: Für bessere UX auch touchcancel behandeln
     button.addEventListener("touchcancel", (e) => {
       e.preventDefault();
       keyboard[key] = false;

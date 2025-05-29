@@ -8,6 +8,10 @@ class SalsaStatusBar extends DrawableObject {
     "img/7_statusbars/1_statusbar/3_statusbar_bottle/green/100.png",
   ];
 
+  /**
+   * Creates an instance of SalsaStatusBar.
+   * Initializes the position, size, and loads the bottle status images.
+   */
   constructor() {
     super();
     this.loadImages(this.IMAGES_BOTTLE);
@@ -18,9 +22,14 @@ class SalsaStatusBar extends DrawableObject {
     this.setPercentage(0);
   }
 
+  /**
+   * Sets the current percentage of collected bottles and updates the displayed image accordingly.
+   * @param {number} percentage - The fill percentage (0 to 100).
+   */
   setPercentage(percentage) {
     this.percentage = percentage;
     let path = this.IMAGES_BOTTLE[this.resolveImageIndex()];
     this.img = this.imageCache[path];
   }
 }
+

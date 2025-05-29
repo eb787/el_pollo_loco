@@ -66,6 +66,7 @@ isColliding(mo) {
     a_top < b_bottom
   );
 }
+
   /**
    * Marks the object as dead and stops its movement.
    * @memberof MovableObject
@@ -108,7 +109,6 @@ hit() {
     this.lastHitBottle = now;
   }
 }
-
 
   /**
    * Reduces the object's energy by 20 when hit by the Endboss.
