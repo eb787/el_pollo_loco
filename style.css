@@ -51,7 +51,6 @@ canvas {
     color: #000;
     border: 2px solid #000;
     border-radius: 100px;
-    box-shadow: 3px 3px 0px #000;
     z-index: 1000;
 }
 
@@ -65,30 +64,10 @@ canvas {
     color: #000;
     border: 2px solid #000;
     border-radius: 100px;
-    box-shadow: 3px 3px 0px #000;
     z-index: 1000;
 }
 
 .div_rules_hover:hover {
-    background-color: #ffe066;
-    box-shadow: 1px 1px 0px #000;
-    transform: scale(1.05);
-    cursor: pointer;
-}
-
-.fullscreen-btn {
-    padding: 15px;
-    font-size: 16px;
-    background-color: #ffcc00;
-    color: #000;
-    border: 2px solid #000;
-    border-radius: 10px;
-    box-shadow: 3px 3px 0px #000;
-    transition: all 0.2s ease;
-    z-index: 1000;
-}
-
-.fullscreen-btn:hover {
     background-color: #ffe066;
     box-shadow: 1px 1px 0px #000;
     transform: scale(1.05);
@@ -169,13 +148,23 @@ canvas {
     }
 }
 
-@media (max-height: 550px) {
+@media (max-height: 750px) {
     .div-impressum {
         display: none
     }
 }
 
-@media (max-height: 500px) {
+@media (max-height: 700px) {
+    .div_rules {
+        font-size: 13px;
+        padding: 10px;
+    }
+
+    .div_rules_hover{
+        font-size: 13px;
+        padding: 10px;
+    }
+
     #button_left {
         position: absolute;
         top: 150px;
@@ -186,7 +175,7 @@ canvas {
     #button_right {
         position: absolute;
         top: 150px;
-        right: 10px;
+        right: 10px;;
         display: none
     }
 
@@ -218,26 +207,27 @@ canvas {
         display: none
     }
 
-    .position_divs_mobile{
-        display: flex;;
+    .position_divs_mobile {
+        display: flex;
     }
 
-    .div_rules{
+    .div_rules {
         margin-bottom: 40px;
     }
 
     .buttons_left {
         top: 40px;
-        left: 10px;
+        left: 0;
         position: absolute;
     }
 
-    .buttons_right{
-         top: 40px;
-        right: 10px;
+    .buttons_right {
+        top: 40px;
+        right: 0;
         position: absolute;
     }
-    .restartBtn{
+
+    .restartBtn {
         position: absolute;
         bottom: 20px;
     }
