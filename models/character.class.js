@@ -69,7 +69,6 @@ class Character extends MovableObject {
     idle: ["audio/snore_character.mp3", 0.1],
     suprise: ["audio/surprise-sound-effect.mp3", 0.2],
   };
-
   lastMoveTime = Date.now();
   idleDuration = 0;
   lastThrowTime = 0;
@@ -81,8 +80,6 @@ class Character extends MovableObject {
   lastSnoreSoundTime = 0;
   snoreSoundCooldown = 6000;
   hasPlayedSurpriseSound = false;
-
-
   offset = {
     top: 100,
     left: 15,
@@ -103,15 +100,23 @@ class Character extends MovableObject {
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_IDLE);
     this.loadImages(this.IMAGES_LONG_IDLE);
-    this.initSounds();
-    this.snoreSound = this.sounds.idle;
     this.applyGravity();
     this.animate();
   }
 
   /**
+   * Sets the reference to the game world and initializes sounds.
+   *
+   * @param {World} world - The game world instance to associate with this object.
+   */
+  setWorld(world) {
+    this.world = world;
+    this.initSounds();
+  }
+
+  /**
    * Starts character animation and movement loops.
-   * This method calls both movement and animation update intervals.
+   * This method initiates both the movement and animation update intervals.
    */
   animate() {
     this.startMovementLoop();
@@ -119,56 +124,116 @@ class Character extends MovableObject {
   }
 
   /**
-   * Starts character movement based on keyboard input.
-   * Updates direction, movement sounds, idle tracking, and camera position.
-   * Also handles the surprise sound effect when reaching a specific position.
+   * Initializes the sounds for this object by calling the SoundHelper,
+   * respecting the muted state of the world, and registering all sounds
+   * in the world's global sound list.
+   * Also sets the snoreSound to the idle sound from the initialized sounds.
    */
-  startMovementLoop() {
-    setInterval(() => {
-      if (this.world?.isGameOver) return;
+  initSounds() {
+    this.sounds = SoundHelper.initSounds(
+      this.AUDIOS,
+      this.world?.isMuted || false,
+      (audio) => SoundHelper.registerSound(audio, this.world?.allSounds || [])
+    );
 
-      if (this.world?.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-        this.moveRight();
-        this.otherDirection = false;
-        this.lastMoveTime = Date.now();
-        this.stopSnoreSound();
-        if (this.isOnGround()) this.playWalkSound();
-      }
+    this.snoreSound = this.sounds.idle;
+  }
 
-      if (this.world?.keyboard.LEFT && this.x > 0) {
-        this.moveLeft();
-        this.otherDirection = true;
-        this.lastMoveTime = Date.now();
-        this.stopSnoreSound();
-        if (this.isOnGround()) this.playWalkSound();
-      }
+  /**
+   * Starts character movement based on keyboard input.
+   * Calls smaller helper methods for specific input handling.
+   */
+ startMovementLoop() {
+  setInterval(() => {
+    if (this.world?.isGameOver) return;
+    if (this.world?.keyboard.RIGHT) this.moveRightHandler();
+    if (this.world?.keyboard.LEFT) this.moveLeftHandler();
+    if (this.world?.keyboard.SPACE) this.jumpHandler();
+    if (this.world?.keyboard.D) this.handleDKey();
 
-      if (this.world?.keyboard.SPACE && !this.isAboveGround()) {
-        this.jump();
-        this.stopSnoreSound();
-        this.lastMoveTime = Date.now();
-      }
+    this.checkSurpriseSound();
+    this.checkIdleSound();
+    this.updateCameraPosition();
+  }, 1000 / 60);
+}
 
-      if (this.world?.keyboard.D) {
-        this.stopSnoreSound();
-        this.lastMoveTime = Date.now();
-      }
 
-      // Play surprise sound when reaching x >= 1900
-      if (!this.hasPlayedSurpriseSound && this.x >= 1900 && !this.world?.isMuted) {
-        this.sounds.suprise.play().catch((e) =>
-          console.warn("Surprise sound blocked:", e)
-        );
-        this.hasPlayedSurpriseSound = true;
-      }
+  /**
+   * Handles the character's right movement.
+   */
+  moveRightHandler() {
+    if (this.x < this.world.level.level_end_x) {
+      this.moveRight();
+      this.otherDirection = false;
+      this.lastMoveTime = Date.now();
+      this.stopSnoreSound();
+      if (this.isOnGround()) this.playWalkSound();
+    }
+  }
 
-      this.idleDuration = Date.now() - this.lastMoveTime;
-      if (this.idleDuration > 5000 && !this.world?.isMuted) {
-        this.playSnoreSound();
-      }
+  /**
+   * Handles the character's left movement.
+   */
+  moveLeftHandler() {
+    if (this.x > 0) {
+      this.moveLeft();
+      this.otherDirection = true;
+      this.lastMoveTime = Date.now();
+      this.stopSnoreSound();
+      if (this.isOnGround()) this.playWalkSound();
+    }
+  }
 
-      this.world.camera_x = -this.x + 200;
-    }, 1000 / 60);
+  /**
+   * Handles character jump.
+   */
+  jumpHandler() {
+    if (!this.isAboveGround()) {
+      this.jump();
+      this.stopSnoreSound();
+      this.lastMoveTime = Date.now();
+    }
+  }
+
+  /**
+   * Handles the D key press (no movement but resets idle timer).
+   */
+  handleDKey() {
+    this.stopSnoreSound();
+    this.lastMoveTime = Date.now();
+  }
+
+  /**
+   * Plays surprise sound once when character reaches x >= 1900.
+   */
+  checkSurpriseSound() {
+    if (
+      !this.hasPlayedSurpriseSound &&
+      this.x >= 1900 &&
+      !this.world?.isMuted
+    ) {
+      this.sounds.suprise
+        .play()
+        .catch((e) => console.warn("Surprise sound blocked:", e));
+      this.hasPlayedSurpriseSound = true;
+    }
+  }
+
+  /**
+   * Plays snore sound if idle for more than 5 seconds.
+   */
+  checkIdleSound() {
+    this.idleDuration = Date.now() - this.lastMoveTime;
+    if (this.idleDuration > 5000 && !this.world?.isMuted) {
+      this.playSnoreSound();
+    }
+  }
+
+  /**
+   * Updates the camera position based on character's x coordinate.
+   */
+  updateCameraPosition() {
+    this.world.camera_x = -this.x + 200;
   }
 
   /**
@@ -178,32 +243,65 @@ class Character extends MovableObject {
   startAnimationLoop() {
     setInterval(() => {
       if (this.isDead()) {
-        this.playAnimation(this.IMAGES_DEAD);
-        this.stopSnoreSound();
+        this.handleDeadAnimation();
         return;
       }
-
       if (this.isHurt()) {
-        this.playHurtSound();
-        this.stopSnoreSound();
-        this.playAnimation(this.IMAGES_HURT);
+        this.handleHurtAnimation();
         return;
       }
-
       if (this.isAboveGround()) {
-        this.playAnimation(this.IMAGES_JUMPING);
-      } else if (this.world?.keyboard.RIGHT || this.world?.keyboard.LEFT) {
-        this.playAnimation(this.IMAGES_WALKING);
+        this.handleJumpingAnimation();
+      } else if (this.world?.keyboard?.RIGHT || this.world?.keyboard?.LEFT) {
+        this.handleWalkingAnimation();
       } else {
-        this.idleDuration = Date.now() - this.lastMoveTime;
-        if (this.idleDuration > 5000) {
-          this.playAnimation(this.IMAGES_LONG_IDLE);
-          this.playSnoreSound();
-        } else {
-          this.playAnimation(this.IMAGES_IDLE);
-        }
+        this.handleIdleAnimation();
       }
     }, 80);
+  }
+
+  /**
+   * Handles the animation when the character is dead.
+   */
+  handleDeadAnimation() {
+    this.playAnimation(this.IMAGES_DEAD);
+    this.stopSnoreSound();
+  }
+
+  /**
+   * Handles the animation and sound when the character is hurt.
+   */
+  handleHurtAnimation() {
+    this.playHurtSound();
+    this.stopSnoreSound();
+    this.playAnimation(this.IMAGES_HURT);
+  }
+
+  /**
+   * Handles the animation when the character is jumping.
+   */
+  handleJumpingAnimation() {
+    this.playAnimation(this.IMAGES_JUMPING);
+  }
+
+  /**
+   * Handles the animation when the character is walking.
+   */
+  handleWalkingAnimation() {
+    this.playAnimation(this.IMAGES_WALKING);
+  }
+
+  /**
+   * Handles the idle animation, including long idle after a delay.
+   */
+  handleIdleAnimation() {
+    this.idleDuration = Date.now() - this.lastMoveTime;
+    if (this.idleDuration > 5000) {
+      this.playAnimation(this.IMAGES_LONG_IDLE);
+      this.playSnoreSound();
+    } else {
+      this.playAnimation(this.IMAGES_IDLE);
+    }
   }
 
   /**

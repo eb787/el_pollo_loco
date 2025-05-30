@@ -28,6 +28,7 @@ class World {
    */
   constructor(canvas, keyboard) {
     this.intervalIds = [];
+    this.allSounds = [];
     this.keyboard = keyboard;
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
@@ -36,6 +37,7 @@ class World {
     this.checkIfPlayerLost();
     this.draw();
     this.run();
+    this.initSounds();
   }
 
   /**
@@ -289,9 +291,8 @@ class World {
     this.addToMap(this.salsaStatusBar);
     this.addToMap(this.endbossStatusBar);
 
-    let self = this;
-    requestAnimationFrame(function () {
-      self.draw();
+    this.animationFrameId = requestAnimationFrame(() => {
+  this.draw();
     });
   }
 
@@ -355,7 +356,6 @@ class World {
     return id;
   }
 
-
   /**
    * Clears all stored intervals to stop repeating functions.
    */
@@ -368,29 +368,63 @@ class World {
    * Stops the game by clearing intervals, stopping sounds,
    * and marking the game as over.
    */
-  stopGame() {
-    this.clearAllIntervals();
-    this.stopAllSounds();
-    this.isGameOver = true;
+stopGame() {
+  this.clearAllIntervals(); 
+  if (this.animationFrameId) {
+    cancelAnimationFrame(this.animationFrameId); 
+    this.animationFrameId = null;
   }
+  this.stopAllSounds();
+  this.isGameOver = true;
+}
+
+cleanup() {
+  this.stopGame();
+  this.character = null;
+  this.level = null;
+  this.statusBar = null;
+  this.coinStatusBar = null;
+  this.salsaStatusBar = null;
+  this.endbossStatusBar = null;
+  this.throwableObjects = [];
+  this.allSounds = [];
+  this.keyboard = null;
+  this.ctx = null;
+  this.canvas = null;
+}
 
   /**
    * Stops all playing sounds including background music and other audios.
    */
-  stopAllSounds() {
-    if (this.backgroundMusic && !this.backgroundMusic.paused) {
-      this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0;
-    }
-    if (this.allSounds) {
-      this.allSounds.forEach((audio) => {
-        if (audio && !audio.paused) {
-          audio.pause();
-          audio.currentTime = 0;
-        }
-      });
-    }
+stopAllSounds() {
+  if (this.backgroundMusic && !this.backgroundMusic.paused) {
+    this.backgroundMusic.pause();
+    this.backgroundMusic.currentTime = 0;
   }
+
+  if (this.allSounds) {
+    this.allSounds.forEach((audio) => {
+      // Win-/Lose-Sound NICHT stoppen
+      if (
+        audio === this.sounds?.win ||
+        audio === this.sounds?.lose
+      ) return;
+
+      if (audio && !audio.paused) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    });
+  }
+}
+
+initSounds() {
+  this.sounds = SoundHelper.initSounds(
+    this.AUDIOS,
+    this.isMuted,
+    (audio) => SoundHelper.registerSound(audio, this.allSounds)
+  );
+}
 
   onMuteChange(isMuted) {
     if (this.backgroundMusic) {
@@ -443,26 +477,27 @@ class World {
    * - Draws win image on canvas
    * - Stops the game and shows restart button
    */
-  showWinScreen() {
-    if (this.backgroundMusic) {
-      this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0;
-    }
-    if (!this.isMuted) {
-      const winAudio = new Audio(this.AUDIOS.win[0]);
-      winAudio.volume = this.AUDIOS.win[1];
-      winAudio.play().catch((e) => console.warn("Win sound blocked:", e));
-    }
-    let winImage = new Image();
-    winImage.src = "img/You won, you lost/You won A.png";
-    winImage.onload = () => {
-      let ctx = this.ctx;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(winImage, 0, 0, canvas.width, canvas.height);
-    };
-    this.stopGame();
-    this.showRestartButton();
+ showWinScreen() {
+  if (this.backgroundMusic) {
+    this.backgroundMusic.pause();
+    this.backgroundMusic.currentTime = 0;
   }
+  if (!this.isMuted && this.sounds?.win) {
+    this.sounds.win.currentTime = 0;
+    this.sounds.win.play().catch((e) =>
+      console.warn("Win sound blocked:", e)
+    );
+  }
+  let winImage = new Image();
+  winImage.src = "img/You won, you lost/You won A.png";
+  winImage.onload = () => {
+    let ctx = this.ctx;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(winImage, 0, 0, canvas.width, canvas.height);
+  };
+  this.stopGame();
+  this.showRestartButton();
+}
 
   /**
    * Displays the lose screen:
@@ -471,35 +506,37 @@ class World {
    * - Draws lose image on canvas
    * - Stops the game and shows restart button
    */
-  showLoseScreen() {
-    if (this.backgroundMusic) {
-      this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0;
-    }
-    if (!this.isMuted) {
-      const loseAudio = new Audio(this.AUDIOS.lose[0]);
-      loseAudio.volume = this.AUDIOS.lose[1];
-      loseAudio.play().catch((e) => console.warn("Lose sound blocked:", e));
-    }
-    let loseImage = new Image();
-    loseImage.src = "img/You won, you lost/You lost.png";
-    loseImage.onload = () => {
-      let ctx = this.ctx;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(loseImage, 0, 0, canvas.width, canvas.height);
-    };
-    this.stopGame();
-    this.showRestartButton();
+ showLoseScreen() {
+  if (this.backgroundMusic) {
+    this.backgroundMusic.pause();
+    this.backgroundMusic.currentTime = 0;
   }
+  if (!this.isMuted && this.sounds?.lose) {
+    this.sounds.lose.currentTime = 0;
+    this.sounds.lose.play().catch((e) =>
+      console.warn("Lose sound blocked:", e)
+    );
+  }
+  let loseImage = new Image();
+  loseImage.src = "img/You won, you lost/You lost.png";
+  loseImage.onload = () => {
+    let ctx = this.ctx;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(loseImage, 0, 0, canvas.width, canvas.height);
+  };
+  this.stopGame();
+  this.showRestartButton();
+}
 
   /**
    * Shows the restart button and reloads the page when clicked.
    */
-  showRestartButton() {
-    const btn = document.getElementById("restartBtn");
-    btn.style.display = "block";
-    btn.onclick = () => {
-      location.reload();
-    };
-  }
+ showRestartButton() {
+  const btn = document.getElementById("restartBtn");
+  btn.style.display = "block";
+  btn.onclick = () => {
+    btn.style.display = "none"; 
+    restartGame(); 
+  };
+}
 }

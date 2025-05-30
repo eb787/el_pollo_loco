@@ -26,23 +26,45 @@ class SmallChicken extends MovableObject {
    * Creates an instance of the SmallChicken.
    * Initializes the small chicken's properties, randomizes its position, and starts its animation.
    */
-constructor() {
-  super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
-  this.loadImages(this.IMAGES_WALKING);
-
-  this.x = this.getRandomPosition();
-  this.energy = 20;  
-  this.speed = 0.15 + Math.random() * 0.45;
-  SmallChicken.smallChickens.push(this);
-  this.animate();
-}
-
-hitByBottle() {
-  this.energy -= 20;
-  if (this.energy <= 0 && !this.dead) {
-    this.die();
+  constructor() {
+    super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
+    this.loadImages(this.IMAGES_WALKING);
+    this.x = this.getRandomPosition();
+    this.energy = 20;
+    this.speed = 0.15 + Math.random() * 0.45;
+    SmallChicken.smallChickens.push(this);
+    this.animate();
   }
-}
+
+  /**
+   * Sets the reference to the game world and initializes sounds.
+   *
+   * @param {World} world - The game world instance to be associated with this object.
+   */
+  setWorld(world) {
+    this.world = world;
+    this.initSounds();
+  }
+
+  /**
+   * Initializes the sounds for this object by calling the SoundHelper,
+   * respecting the muted state of the world, and registering all sounds
+   * in the world's global sound list.
+   */
+  initSounds() {
+    this.sounds = SoundHelper.initSounds(
+      this.AUDIOS,
+      this.world?.isMuted || false,
+      (audio) => SoundHelper.registerSound(audio, this.world?.allSounds || [])
+    );
+  }
+
+  hitByBottle() {
+    this.energy -= 20;
+    if (this.energy <= 0 && !this.dead) {
+      this.die();
+    }
+  }
 
   /**
    * Generates a random x-position for the small chicken, ensuring it doesn't overlap with other small chickens.
@@ -100,16 +122,16 @@ hitByBottle() {
    */
   playHurtSound() {
     if (this.world?.isMuted) return;
-    const currentTime = Date.now();
-    if (currentTime - this.lastHurtSoundTime > this.hurtSoundCooldown) {
-      if (this.sounds.hurt) {
-        this.sounds.hurt
-          .play()
-          .catch((e) => console.warn("SmallChicken sound blocked:", e));
-        this.lastHurtSoundTime = currentTime;
-      } else {
-        console.warn("SmallChicken hurt sound not found!");
-      }
+    const now = Date.now();
+    if (
+      now - this.lastHurtSoundTime > this.hurtSoundCooldown &&
+      this.sounds?.hurt
+    ) {
+      this.sounds.hurt.currentTime = 0;
+      this.sounds.hurt
+        .play()
+        .catch((e) => console.warn("SmallChicken sound blocked:", e));
+      this.lastHurtSoundTime = now;
     }
   }
 }

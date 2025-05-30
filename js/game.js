@@ -6,6 +6,12 @@ let keyboard = new Keyboard();
 let startScreenImage = new Image();
 startScreenImage.src = "img/9_intro_outro_screens/start/startscreen_1.png";
 let isMuted = false;
+let mobileControlsInitialized = false;
+let AUDIOS = {
+  guitar: ["audio/guitar.mp3", 0.1],
+  win: ["audio/win.mp3", 0.5],
+  lose: ["audio/fail.mp3", 0.5],
+};
 
 /**
  * Called on page load.
@@ -22,7 +28,6 @@ function init() {
     drawStartScreen();
     setupStartListener();
   }
-  document.getElementById("muteBtn").addEventListener("click", toggleMute);
 }
 
 /**
@@ -53,21 +58,44 @@ function startGameOnce() {
 }
 
 /**
- * Initializes the game world, background music, mobile controls, and reload buttons.
+ * Starts the game by initializing the level, game world, audio, mobile controls,
+ * and reload buttons.
  */
 function startGame() {
   initLevel1();
   world = new World(canvas, keyboard);
   world.isMuted = isMuted;
-  world.backgroundMusic = new Audio("audio/guitar.mp3");
-  world.backgroundMusic.loop = true;
-  world.backgroundMusic.volume = 0.1;
-  world.backgroundMusic.muted = isMuted;
-  world.backgroundMusic.play().catch((error) => {
-    console.warn("Autoplay prevented:", error);
-  });
+  setupGameAudio();
   setupMobileControls();
   bindReloadButton();
+}
+
+/**
+ * Loads and configures all required game audio, including background music
+ * and win/lose sounds. Assigns them to the world and plays background music.
+ */
+function setupGameAudio() {
+  const audioInstances = {};
+  for (const [key, [src, volume]] of Object.entries(AUDIOS)) {
+    const audio = new Audio(src);
+    audio.volume = volume;
+    audio.loop = key === "guitar"; // Only loop background music
+    audio.muted = isMuted;
+    audioInstances[key] = audio;
+    world.allSounds ??= [];
+    world.allSounds.push(audio);
+  }
+  // Play background music
+  backgroundMusic = audioInstances.guitar;
+  backgroundMusic.play().catch((error) => {
+    console.warn("Autoplay prevented:", error);
+  });
+  world.backgroundMusic = backgroundMusic;
+  // Assign win and lose sounds
+  world.sounds = {
+    win: audioInstances.win,
+    lose: audioInstances.lose,
+  };
 }
 
 /**
@@ -92,14 +120,27 @@ function bindReloadButton() {
  */
 function toggleMute() {
   isMuted = !isMuted;
+  localStorage.setItem("isMuted", isMuted ? "true" : "false");
   updateWorldSounds(isMuted);
-  updateAllAudioElements(isMuted);
   updateMuteIcons(isMuted);
 }
 
+window.addEventListener("DOMContentLoaded", () => {
+  const savedMute = localStorage.getItem("isMuted");
+  isMuted = savedMute === "true";
+  updateWorldSounds(isMuted);
+  updateMuteIcons(isMuted);
+
+  const muteBtn = document.getElementById("muteBtn");
+  if (muteBtn) muteBtn.addEventListener("click", toggleMute);
+
+  const muteBtnMobile = document.getElementById("muteBtn_mobile");
+  if (muteBtnMobile) muteBtnMobile.addEventListener("click", toggleMute);
+});
+
 /**
  * Updates the mute state of all sounds within the game world.
- * 
+ *
  * @param {boolean} muted - Whether to mute or unmute the sounds.
  */
 function updateWorldSounds(muted) {
@@ -108,33 +149,20 @@ function updateWorldSounds(muted) {
       world.onMuteChange(muted);
     }
     world.isMuted = muted;
-
     if (Array.isArray(world.allSounds)) {
       world.allSounds.forEach((audio) => {
         audio.muted = muted;
       });
     }
   }
-
   if (backgroundMusic) {
     backgroundMusic.muted = muted;
   }
 }
 
 /**
- * Mutes or unmutes all <audio> elements on the page.
- * 
- * @param {boolean} muted - Whether to mute all audio elements.
- */
-function updateAllAudioElements(muted) {
-  document.querySelectorAll("audio").forEach((audio) => {
-    audio.muted = muted;
-  });
-}
-
-/**
  * Updates the mute/unmute icons for desktop and mobile mute buttons.
- * 
+ *
  * @param {boolean} muted - If true, shows the muted icon; otherwise, the unmuted icon.
  */
 function updateMuteIcons(muted) {
@@ -155,22 +183,13 @@ function updateMuteIcons(muted) {
 }
 
 /**
- * Adds click listeners for mute buttons on both desktop and mobile.
- */
-window.addEventListener("DOMContentLoaded", () => {
-  const muteBtn = document.getElementById("muteBtn");
-  if (muteBtn) muteBtn.addEventListener("click", toggleMute);
-
-  const muteBtnMobile = document.getElementById("muteBtn_mobile");
-  if (muteBtnMobile) muteBtnMobile.addEventListener("click", toggleMute);
-});
-
-/**
  * Handles keydown events and updates the keyboard object state accordingly.
  */
 window.addEventListener("keydown", (e) => {
   if (
-    ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)
+    ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
+      e.code
+    )
   ) {
     e.preventDefault();
   }
@@ -199,6 +218,9 @@ window.addEventListener("keyup", (e) => {
  * updating the keyboard state on touchstart and touchend.
  */
 function setupMobileControls() {
+  if (mobileControlsInitialized) return;
+  mobileControlsInitialized = true;
+
   const buttons = [
     { el: "button_left", key: "LEFT" },
     { el: "button_right", key: "RIGHT" },
@@ -229,4 +251,25 @@ function setupMobileControls() {
       keyboard[key] = false;
     });
   });
+}
+
+function restartGame() {
+  if (world) {
+    world.cleanup();
+    world = null;
+  }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  initLevel1();
+  world = new World(canvas, keyboard);
+  world.isMuted = isMuted;
+  world.backgroundMusic = new Audio("audio/guitar.mp3");
+  world.backgroundMusic.loop = true;
+  world.backgroundMusic.volume = 0.1;
+  world.backgroundMusic.muted = isMuted;
+  world.backgroundMusic.play().catch((error) => {
+    console.warn("Autoplay prevented:", error);
+  });
+  if (!world.allSounds) world.allSounds = [];
+  world.allSounds.push(world.backgroundMusic);
+  setupMobileControls();
 }

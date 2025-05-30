@@ -38,6 +38,29 @@ class Chicken extends MovableObject {
   }
 
   /**
+   * Sets the reference to the game world and initializes sounds.
+   *
+   * @param {World} world - The game world instance to be associated with this object.
+   */
+  setWorld(world) {
+    this.world = world;
+    this.initSounds();
+  }
+
+  /**
+   * Initializes the sounds for this object by calling the SoundHelper,
+   * respecting the muted state of the world, and registering all sounds
+   * in the world's global sound list.
+   */
+  initSounds() {
+    this.sounds = SoundHelper.initSounds(
+      this.AUDIOS,
+      this.world?.isMuted || false,
+      (audio) => SoundHelper.registerSound(audio, this.world?.allSounds || [])
+    );
+  }
+
+  /**
    * Generates a random x-position for the chicken, ensuring it doesn't overlap with other chickens.
    * @returns {number} - The random x-coordinate for the chicken.
    */
@@ -71,6 +94,12 @@ class Chicken extends MovableObject {
     clearInterval(this.walkAnimationInterval);
   }
 
+  /**
+   * Reduces the Endboss' energy by 20 when hit by a bottle.
+   * Ensures energy does not go below zero.
+   * Triggers the death sequence if energy reaches zero and the boss is not already dead.
+   * Records the timestamp of the last bottle hit.
+   */
   hitByBottle() {
     this.energy -= 20;
     if (this.energy < 0) this.energy = 0;

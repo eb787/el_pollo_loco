@@ -28,6 +28,29 @@ class Coins extends MovableObject {
     this.animate();
   }
 
+   /**
+   * Sets the reference to the game world and initializes sounds.
+   *
+   * @param {World} world - The game world instance to be associated with this object.
+   */
+  setWorld(world) {
+    this.world = world;
+    this.initSounds();
+  }
+
+  /**
+   * Initializes the sounds for this object by calling the SoundHelper,
+   * respecting the muted state of the world, and registering all sounds
+   * in the world's global sound list.
+   */
+  initSounds() {
+    this.sounds = SoundHelper.initSounds(
+      this.AUDIOS,
+      this.world?.isMuted || false,
+      (audio) => SoundHelper.registerSound(audio, this.world?.allSounds || [])
+    );
+  }
+
   /**
    * Handles the animation of the coin.
    * Cycles through the coin images every 200 milliseconds.

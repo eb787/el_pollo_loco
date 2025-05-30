@@ -68,7 +68,7 @@ canvas {
 }
 
 .div_rules_hover:hover {
-    background-color: #ffe066;
+    background-color: #fd8700;
     box-shadow: 1px 1px 0px #000;
     transform: scale(1.05);
     cursor: pointer;
@@ -148,13 +148,13 @@ canvas {
     }
 }
 
-@media (max-height: 600px) {
+@media (max-height: 650px) {
     .div-impressum {
         display: none
     }
 }
 
-@media (max-height: 650px) {
+@media (max-height: 550px) {
     .div_rules {
         font-size: 13px;
         padding: 10px;

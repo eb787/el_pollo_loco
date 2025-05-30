@@ -4,7 +4,6 @@ class Endboss extends MovableObject {
   y = 5;
   energy = 100;
   world;
-
   IMAGES_ALERT = [
     "img/4_enemie_boss_chicken/2_alert/G5.png",
     "img/4_enemie_boss_chicken/2_alert/G6.png",
@@ -52,11 +51,6 @@ class Endboss extends MovableObject {
     bottom: 10,
   };
 
-  /**
-   * Creates an instance of Endboss.
-   * Loads all necessary images for different animation states,
-   * sets initial position and properties, and starts animation loop.
-   */
   constructor() {
     super().loadImage("img/4_enemie_boss_chicken/2_alert/G5.png");
     this.loadImages(this.IMAGES_DEAD);
@@ -70,15 +64,40 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Animates the Endboss by switching between alert, walking, attack,
-   * hurt, and dead states depending on proximity to the player and health.
+   * Sets the reference to the game world and initializes sounds.
+   *
+   * @param {World} world - The game world instance to be associated with this object.
+   */
+  setWorld(world) {
+    this.world = world;
+    this.initSounds();
+  }
+
+  /**
+   * Initializes the sounds for this object by calling the SoundHelper,
+   * respecting the muted state of the world, and registering all sounds
+   * in the world's global sound list.
+   */
+  initSounds() {
+    this.sounds = SoundHelper.initSounds(
+      this.AUDIOS,
+      this.world?.isMuted || false,
+      (audio) => SoundHelper.registerSound(audio, this.world?.allSounds || [])
+    );
+  }
+
+  /**
+   * Starts the animation logic for the Endboss.
+   * Controls animations and sound effects depending on the Endboss' state:
+   * dead, hurt, walking towards the character, attacking, or alert.
    */
   animate() {
     setInterval(() => {
       if (this.world?.isGameOver || !this.character) {
-        this.stopWalkSound(); 
+        this.stopWalkSound();
         return;
       }
+
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
       } else if (this.isHurtByBottle()) {
@@ -101,8 +120,9 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Moves the Endboss towards the character by adjusting its x-position.
-   * @param {Object} character - The character object to move towards.
+   * Moves the Endboss towards the character horizontally.
+   *
+   * @param {MovableObject} character - The target character to move towards.
    */
   moveTowardsCharacter(character) {
     if (this.x < character.x) {
@@ -115,15 +135,15 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Plays the "hurt" sound effect when the Endboss is damaged.
-   * Includes a cooldown to prevent overlapping sound playback.
+   * Plays the hurt sound if not muted and at least 1 second
+   * has passed since the last time it played.
    */
   playHurtSound() {
     if (this.world?.isMuted) return;
     const now = Date.now();
     if (now - this.lastHurtSoundTime > 1000) {
       if (this.sounds.hurt) {
-        this.sounds.hurt.play().catch(e =>
+        this.sounds.hurt.play().catch((e) =>
           console.warn("Endboss hurt sound blocked:", e)
         );
         this.lastHurtSoundTime = now;
@@ -134,8 +154,8 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Plays the walking sound effect when the Endboss is moving.
-   * Mutes background music while walking sound is playing.
+   * Plays the walking sound loop if available,
+   * pauses background music while walking sound is playing.
    */
   playWalkSound() {
     if (this.world?.isGameOver || this.world?.isMuted) return;
@@ -143,18 +163,20 @@ class Endboss extends MovableObject {
     if (walkingSound && walkingSound.paused) {
       walkingSound.loop = true;
       walkingSound.volume = this.AUDIOS.walking[1];
+
       if (this.world?.backgroundMusic && !this.world.backgroundMusic.paused) {
         this.world.backgroundMusic.pause();
       }
-      walkingSound.play().catch(e =>
+
+      walkingSound.play().catch((e) =>
         console.warn("Endboss walking sound blocked:", e)
       );
     }
   }
 
   /**
-   * Stops the walking sound if it is playing.
-   * Resumes background music if appropriate.
+   * Stops the walking sound and resets its playback.
+   * Resumes background music if muted state allows it.
    */
   stopWalkSound() {
     if (this.sounds?.walking && !this.sounds.walking.paused) {
@@ -166,7 +188,7 @@ class Endboss extends MovableObject {
         this.world.backgroundMusic.paused &&
         !this.world.isMuted
       ) {
-        this.world.backgroundMusic.play().catch(e =>
+        this.world.backgroundMusic.play().catch((e) =>
           console.warn("Background music play error:", e)
         );
       }
@@ -174,9 +196,10 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Reacts to mute changes in the game.
-   * If muted, all boss-related sounds are stopped.
-   * @param {boolean} isMuted - True if the game is muted, otherwise false.
+   * Handles muting behavior by stopping all Endboss sounds
+   * when the game is muted.
+   *
+   * @param {boolean} isMuted - Indicates whether the game is muted.
    */
   onMuteChange(isMuted) {
     if (isMuted) {

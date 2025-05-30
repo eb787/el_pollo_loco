@@ -9,10 +9,6 @@ class Salsa extends MovableObject {
     "img/6_salsa_bottle/2_salsa_bottle_on_ground.png",
   ];
 
-  /**
-   * Audio configuration for salsa bottle sounds.
-   * Key: identifier, Value: [audio source, volume]
-   */
   AUDIOS = {
     collect: ["audio/collect_bottle.mp3", 0.3],
   };
@@ -24,22 +20,41 @@ class Salsa extends MovableObject {
     bottom: 10,
   };
 
-  /**
-   * Creates an instance of Salsa at a specific x-position.
-   * Loads the salsa bottle image and registers audio.
-   * @param {number} x - The x-position where the salsa bottle appears.
-   */
   constructor(x) {
-    super(); // Automatically loads audio via DrawableObject constructor
+    super();
     this.loadImages(this.IMAGES_SALSA);
-     this.loadImage(this.IMAGES_SALSA[0]);
+    this.loadImage(this.IMAGES_SALSA[0]);
     this.x = x;
     this.animate();
   }
 
-   /**
-   * Handles the animation of the coin.
-   * Cycles through the coin images every 200 milliseconds.
+  /**
+   * Sets the reference to the game world and initializes the sounds for this object.
+   *
+   * @param {World} world - The game world instance to associate with this object.
+   */
+  setWorld(world) {
+    this.world = world;
+    this.initSounds();
+  }
+
+  /**
+   * Initializes audio assets for the salsa object.
+   * Takes into account the muted state of the world and registers
+   * the audio instances globally in the world’s sound list.
+   */
+  initSounds() {
+    this.sounds = SoundHelper.initSounds(
+      this.AUDIOS,
+      this.world?.isMuted || false,
+      (audio) => SoundHelper.registerSound(audio, this.world?.allSounds || [])
+    );
+  }
+
+  /**
+   * Starts an animation loop cycling through salsa bottle images
+   * to create a simple animation effect.
+   * Changes image every 200 milliseconds.
    */
   animate() {
     setInterval(() => {
@@ -48,20 +63,20 @@ class Salsa extends MovableObject {
     }, 200);
   }
 
-/**
- * Plays the sound when the salsa bottle is collected.
- * Only plays once to prevent repeated triggering.
- */
-playCollectSalsaSound() {
-  if (this.collected || this.world?.isMuted) return; 
-  this.collected = true;
+  /**
+   * Plays the collection sound when the salsa bottle is picked up.
+   * Ensures the sound is only played once and respects the muted state.
+   */
+  playCollectSalsaSound() {
+    if (this.collected || this.world?.isMuted) return;
+    this.collected = true;
 
-  const sound = this.sounds?.collect;
-  if (sound) {
-    sound.volume = this.AUDIOS.collect[1];
-    sound.play().catch(e => console.warn("Collect sound blocked:", e));
-  } else {
-    console.warn("Salsa collect sound not found!");
+    const sound = this.sounds?.collect;
+    if (sound) {
+      sound.volume = this.AUDIOS.collect[1];
+      sound.play().catch((e) => console.warn("Collect sound blocked:", e));
+    } else {
+      console.warn("Salsa collect sound not found!");
+    }
   }
-}
 }
