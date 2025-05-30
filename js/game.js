@@ -14,16 +14,17 @@ let AUDIOS = {
 };
 
 /**
- * Called on page load.
- * Initializes the canvas, draws the start screen, and sets up event listeners.
+ * Initializes the canvas and draws the start screen once the DOM is ready.
  */
 function init() {
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext("2d");
+
   startScreenImage.onload = () => {
     drawStartScreen();
     setupStartListener();
   };
+
   if (startScreenImage.complete) {
     drawStartScreen();
     setupStartListener();
@@ -31,7 +32,7 @@ function init() {
 }
 
 /**
- * Draws the start screen image and a "Click to Start" prompt.
+ * Draws the game's start screen and a "Click to Start" prompt.
  */
 function drawStartScreen() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -43,14 +44,14 @@ function drawStartScreen() {
 }
 
 /**
- * Sets up a click listener on the canvas to start the game.
+ * Attaches a click event listener to start the game.
  */
 function setupStartListener() {
   canvas.addEventListener("click", startGameOnce);
 }
 
 /**
- * Starts the game on first click, then removes the click listener to prevent multiple starts.
+ * Starts the game only once per session, then removes the click listener.
  */
 function startGameOnce() {
   canvas.removeEventListener("click", startGameOnce);
@@ -58,8 +59,7 @@ function startGameOnce() {
 }
 
 /**
- * Starts the game by initializing the level, game world, audio, mobile controls,
- * and reload buttons.
+ * Starts the game by initializing the level, the game world, and other components.
  */
 function startGame() {
   initLevel1();
@@ -71,27 +71,27 @@ function startGame() {
 }
 
 /**
- * Loads and configures all required game audio, including background music
- * and win/lose sounds. Assigns them to the world and plays background music.
+ * Configures and plays game audio including background music and SFX.
  */
 function setupGameAudio() {
   const audioInstances = {};
   for (const [key, [src, volume]] of Object.entries(AUDIOS)) {
     const audio = new Audio(src);
     audio.volume = volume;
-    audio.loop = key === "guitar"; // Only loop background music
+    audio.loop = key === "guitar";
     audio.muted = isMuted;
     audioInstances[key] = audio;
+
     world.allSounds ??= [];
     world.allSounds.push(audio);
   }
-  // Play background music
+
   backgroundMusic = audioInstances.guitar;
-  backgroundMusic.play().catch((error) => {
-    console.warn("Autoplay prevented:", error);
-  });
+  backgroundMusic.play().catch((error) =>
+    console.warn("Autoplay prevented:", error)
+  );
   world.backgroundMusic = backgroundMusic;
-  // Assign win and lose sounds
+
   world.sounds = {
     win: audioInstances.win,
     lose: audioInstances.lose,
@@ -99,7 +99,7 @@ function setupGameAudio() {
 }
 
 /**
- * Adds event listeners to reload buttons for desktop and mobile.
+ * Attaches reload handlers to the reload buttons for both desktop and mobile.
  */
 function bindReloadButton() {
   const buttons = ["button_reload", "button_reload_mobile"];
@@ -116,7 +116,7 @@ function bindReloadButton() {
 }
 
 /**
- * Toggles the mute state for all game sounds and UI elements.
+ * Toggles the mute state and updates audio and UI accordingly.
  */
 function toggleMute() {
   isMuted = !isMuted;
@@ -125,6 +125,9 @@ function toggleMute() {
   updateMuteIcons(isMuted);
 }
 
+/**
+ * Called when the DOM content is loaded. Initializes mute state and buttons.
+ */
 window.addEventListener("DOMContentLoaded", () => {
   const savedMute = localStorage.getItem("isMuted");
   isMuted = savedMute === "true";
@@ -139,9 +142,9 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 /**
- * Updates the mute state of all sounds within the game world.
- *
- * @param {boolean} muted - Whether to mute or unmute the sounds.
+ * Updates all sound objects with the new mute state.
+ * 
+ * @param {boolean} muted - Whether to mute or unmute all sounds.
  */
 function updateWorldSounds(muted) {
   if (world) {
@@ -161,9 +164,9 @@ function updateWorldSounds(muted) {
 }
 
 /**
- * Updates the mute/unmute icons for desktop and mobile mute buttons.
- *
- * @param {boolean} muted - If true, shows the muted icon; otherwise, the unmuted icon.
+ * Updates the icon of the mute button based on the current mute state.
+ * 
+ * @param {boolean} muted - Whether the sound is currently muted.
  */
 function updateMuteIcons(muted) {
   const muteBtnImg = document.querySelector("#muteBtn img");
@@ -183,7 +186,7 @@ function updateMuteIcons(muted) {
 }
 
 /**
- * Handles keydown events and updates the keyboard object state accordingly.
+ * Handles keydown events and updates the keyboard state accordingly.
  */
 window.addEventListener("keydown", (e) => {
   if (
@@ -202,7 +205,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 /**
- * Handles keyup events and resets the keyboard object state accordingly.
+ * Handles keyup events and resets the keyboard state accordingly.
  */
 window.addEventListener("keyup", (e) => {
   if (e.keyCode == 39) keyboard.RIGHT = false;
@@ -214,8 +217,7 @@ window.addEventListener("keyup", (e) => {
 });
 
 /**
- * Sets up touch event listeners for mobile control buttons,
- * updating the keyboard state on touchstart and touchend.
+ * Sets up touch controls for mobile devices to simulate keyboard input.
  */
 function setupMobileControls() {
   if (mobileControlsInitialized) return;
@@ -253,11 +255,15 @@ function setupMobileControls() {
   });
 }
 
+/**
+ * Restarts the game by clearing the current world and creating a new one.
+ */
 function restartGame() {
   if (world) {
     world.cleanup();
     world = null;
   }
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   initLevel1();
   world = new World(canvas, keyboard);
@@ -266,10 +272,13 @@ function restartGame() {
   world.backgroundMusic.loop = true;
   world.backgroundMusic.volume = 0.1;
   world.backgroundMusic.muted = isMuted;
-  world.backgroundMusic.play().catch((error) => {
-    console.warn("Autoplay prevented:", error);
-  });
+
+  world.backgroundMusic.play().catch((error) =>
+    console.warn("Autoplay prevented:", error)
+  );
+
   if (!world.allSounds) world.allSounds = [];
   world.allSounds.push(world.backgroundMusic);
+
   setupMobileControls();
 }
