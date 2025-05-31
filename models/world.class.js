@@ -292,7 +292,6 @@ class World {
     this.addToMap(this.coinStatusBar);
     this.addToMap(this.salsaStatusBar);
     this.addToMap(this.endbossStatusBar);
-
     this.animationFrameId = requestAnimationFrame(() => {
       this.draw();
     });
@@ -373,37 +372,59 @@ class World {
    * and marking the game as over.
    */
   stopGame() {
-    console.log(
-      "stopGame called, clearing intervals:",
-      this.intervalIds.length
-    );
-
     this.level.enemies.forEach((enemy) => enemy.clearAllIntervals());
     this.throwableObjects.forEach((obj) => obj.clearAllIntervals());
     this.character.clearAllIntervals();
-
     this.clearAllIntervals();
-
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
-
     this.stopAllSounds();
-
     this.isGameOver = true;
   }
 
+  /**
+   * Performs full cleanup by first releasing sounds, then cleaning the world.
+   */
   cleanup() {
+    this.cleanupSounds();
+    this.cleanupWorld();
+  }
+
+  /**
+   * Stops and releases all audio resources by pausing, removing sources,
+   * and resetting audio elements in the allSounds array.
+   */
+  cleanupSounds() {
+    if (this.allSounds && this.allSounds.length > 0) {
+      this.allSounds.forEach((audio) => {
+        try {
+          audio.pause();
+          audio.src = "";
+          audio.load();
+        } catch (e) {
+          console.warn("Error while cleaning up a sound:", e);
+        }
+      });
+    }
+    this.allSounds = [];
+  }
+
+  /**
+   * Cleans up the game world by stopping the game and resetting all
+   * game-related properties, allowing garbage collection and fresh start.
+   */
+  cleanupWorld() {
     this.stopGame();
     this.character = null;
     this.level = null;
+    Chicken.chickens = [];
     this.statusBar = null;
     this.coinStatusBar = null;
     this.salsaStatusBar = null;
     this.endbossStatusBar = null;
     this.throwableObjects = [];
-    this.allSounds = [];
     this.keyboard = null;
     this.ctx = null;
     this.canvas = null;
@@ -431,9 +452,10 @@ class World {
   }
 
   initSounds() {
-    this.sounds = SoundHelper.initSounds(this.AUDIOS, this.isMuted, (audio) =>
+    const newSounds = SoundHelper.initSounds(this.AUDIOS, false, (audio) =>
       SoundHelper.registerSound(audio, this.allSounds)
     );
+    this.sounds = newSounds;
   }
 
   /**
@@ -529,22 +551,21 @@ class World {
   /**
    * Shows the restart button and reloads the page when clicked.
    */
- showRestartButton() {
-  const btn = document.getElementById("restartBtn");
-  btn.style.display = "block";
+  showRestartButton() {
+    const btn = document.getElementById("restartBtn");
+    btn.style.display = "block";
 
-  // Falls es schon einen Listener gibt, entfernen wir ihn
-  if (this._restartHandler) {
-    btn.removeEventListener("click", this._restartHandler);
+    // Falls es schon einen Listener gibt, entfernen wir ihn
+    if (this._restartHandler) {
+      btn.removeEventListener("click", this._restartHandler);
+    }
+
+    // Event Handler als Property speichern, damit removeEventListener funktioniert
+    this._restartHandler = () => {
+      btn.style.display = "none";
+      restartGame();
+    };
+
+    btn.addEventListener("click", this._restartHandler);
   }
-
-  // Event Handler als Property speichern, damit removeEventListener funktioniert
-  this._restartHandler = () => {
-    btn.style.display = "none";
-    restartGame();
-  };
-
-  btn.addEventListener("click", this._restartHandler);
-}
-
 }

@@ -6,6 +6,8 @@ let keyboard = new Keyboard();
 let startScreenImage = new Image();
 startScreenImage.src = "img/9_intro_outro_screens/start/startscreen_1.png";
 let isMuted = false;
+let isRestarting = false;
+let bgMusic = null;
 let mobileControlsInitialized = false;
 let AUDIOS = {
   guitar: ["audio/guitar.mp3", 0.1],
@@ -73,6 +75,36 @@ function startGame() {
 }
 
 
+/**
+ * Binds handlers to reload buttons that return to the start screen instead of reloading the page.
+ */
+function bindReloadButton() {
+  const buttons = ["button_reload", "button_reload_mobile"];
+  buttons.forEach((id) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+
+    btn.addEventListener("click", () => returnToStartScreen());
+    btn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      returnToStartScreen();
+    });
+  });
+}
+
+/**
+ * Cleans up the game and returns to the start screen UI.
+ */
+function returnToStartScreen() {
+  if (world) {
+    world.stopGame();
+    world.cleanup?.();
+    world = null;
+  }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawStartScreen();
+  setupStartListener(); 
+}
 
 /**
  * Configures and plays game audio including background music and SFX.
@@ -89,34 +121,15 @@ function setupGameAudio() {
     world.allSounds ??= [];
     world.allSounds.push(audio);
   }
-
   backgroundMusic = audioInstances.guitar;
   backgroundMusic.play().catch((error) =>
     console.warn("Autoplay prevented:", error)
   );
   world.backgroundMusic = backgroundMusic;
-
   world.sounds = {
     win: audioInstances.win,
     lose: audioInstances.lose,
   };
-}
-
-/**
- * Attaches reload handlers to the reload buttons for both desktop and mobile.
- */
-function bindReloadButton() {
-  const buttons = ["button_reload", "button_reload_mobile"];
-  buttons.forEach((id) => {
-    const btn = document.getElementById(id);
-    if (!btn) return;
-
-    btn.addEventListener("click", () => location.reload());
-    btn.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      location.reload();
-    });
-  });
 }
 
 /**
@@ -260,46 +273,62 @@ function setupMobileControls() {
 }
 
 /**
- * Restarts the game by clearing the current world and creating a new one.
+ * Stops the current game and cleans up resources,
+ * including stopping and resetting background music.
  */
-let isRestarting = false;
-
-function restartGame() {
-  if (isRestarting) return;
-  isRestarting = true;
-
-  console.log('Creating new world instance');
-
+function stopAndCleanupGame() {
   if (world) {
     world.stopGame();
+    if (bgMusic) {
+      bgMusic.pause();
+      bgMusic.currentTime = 0;
+    }
     world = null;
   }
-
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
+/**
+ * Initializes the game world, background music and controls,
+ * then starts the background music with a slight delay.
+ * 
+ * @param {HTMLCanvasElement} canvas - The canvas element for the game.
+ * @param {Keyboard} keyboard - The keyboard input handler.
+ * @param {boolean} isMuted - Whether the audio should be muted.
+ */
+function setupAndStartGame(canvas, keyboard, isMuted) {
   initLevel1();
-
   world = new World(canvas, keyboard);
   world.isMuted = isMuted;
   world.isStopping = false;
   world.isGameOver = false;
-
-  const bgMusic = new Audio("audio/guitar.mp3");
-  bgMusic.loop = true;
-  bgMusic.volume = 0.1;
+  if (!bgMusic) {
+    bgMusic = new Audio("audio/guitar.mp3");
+    bgMusic.loop = true;
+    bgMusic.volume = 0.1;
+  }
   bgMusic.muted = isMuted;
   world.backgroundMusic = bgMusic;
-
   if (!world.allSounds) world.allSounds = [];
   world.allSounds.push(bgMusic);
-
-  bgMusic.play().catch((err) => console.warn("Autoplay prevented", err));
-
+  if (!isMuted) {
+    setTimeout(() => {
+      if (bgMusic.paused) {
+        bgMusic.play().catch(err => console.warn("Autoplay prevented", err));
+      }
+    }, 100);
+  }
   setupMobileControls();
-
-  isRestarting = false;
 }
 
-
-
-
+/**
+ * Main function to restart the game, ensures restart only happens once at a time.
+ * It stops the current game, cleans up and then setups and starts a new game instance.
+ */
+function restartGame() {
+  if (isRestarting) return;
+  isRestarting = true;
+  stopAndCleanupGame();
+  setupAndStartGame(canvas, keyboard, isMuted);
+  isRestarting = false;
+}

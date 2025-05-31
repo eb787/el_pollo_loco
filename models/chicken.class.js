@@ -64,22 +64,31 @@ class Chicken extends MovableObject {
    * Generates a random x-position for the chicken, ensuring it doesn't overlap with other chickens.
    * @returns {number} - The random x-coordinate for the chicken.
    */
-  getRandomPosition() {
-    let xPosition;
-    let isValid = false;
+getRandomPosition() {
+  let xPosition;
+  let isValid = false;
+  let attempts = 0;
 
-    while (!isValid) {
-      xPosition = 1100 + Math.random() * 800;
-      isValid = true;
-      for (let chicken of Chicken.chickens) {
-        if (Math.abs(chicken.x - xPosition) < this.width) {
-          isValid = false;
-          break;
-        }
+  while (!isValid && attempts < 100) {
+    xPosition = 1100 + Math.random() * 1400;
+    isValid = true;
+    for (let chicken of Chicken.chickens) {
+      if (Math.abs(chicken.x - xPosition) < this.width) {
+        isValid = false;
+        break;
       }
     }
-    return xPosition;
+    attempts++;
   }
+
+  if (!isValid) {
+    console.warn("Keine gültige Position für Chicken gefunden, nehme letzte Position.");
+  }
+
+  return xPosition;
+}
+
+
 
   /**
    * Marks the chicken as dead, updates its image, and plays the hurt sound.

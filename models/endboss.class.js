@@ -97,7 +97,6 @@ class Endboss extends MovableObject {
         this.stopWalkSound();
         return;
       }
-
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
       } else if (this.isHurtByBottle()) {
@@ -127,10 +126,10 @@ class Endboss extends MovableObject {
   moveTowardsCharacter(character) {
     if (this.x < character.x) {
       this.otherDirection = true;
-      this.x += 18;
+      this.x += 20;
     } else {
       this.otherDirection = false;
-      this.x -= 18;
+      this.x -= 20;
     }
   }
 

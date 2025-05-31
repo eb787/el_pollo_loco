@@ -146,8 +146,6 @@ startAnimation() {
   }, 80);
 }
 
-
-
   /**
    * Starts the splash animation once the ground is hit.
    */

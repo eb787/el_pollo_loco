@@ -12,10 +12,10 @@ class SmallChicken extends MovableObject {
     hurt: ["audio/jump_small_chicken.mp3", 0.5],
   };
   offset = {
-    top: 5,
-    left: 5,
-    right: 5,
-    bottom: 5,
+    top: 10,
+    left: 10,
+    right: 10,
+    bottom: 10,
   };
   dead = false;
   static smallChickens = [];
@@ -30,7 +30,7 @@ class SmallChicken extends MovableObject {
     super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
     this.loadImages(this.IMAGES_WALKING);
     this.x = this.getRandomPosition();
-    this.energy = 20;
+    this.energy = 35;
     this.speed = 0.15 + Math.random() * 0.45;
     SmallChicken.smallChickens.push(this);
     this.animate();
@@ -70,23 +70,30 @@ class SmallChicken extends MovableObject {
    * Generates a random x-position for the small chicken, ensuring it doesn't overlap with other small chickens.
    * @returns {number} - The random x-coordinate for the small chicken.
    */
-  getRandomPosition() {
-    let xPosition;
-    let isValid = false;
+ getRandomPosition() {
+  let xPosition;
+  let isValid = false;
+  let attempts = 0;
 
-    while (!isValid) {
-      xPosition = 450 + Math.random() * 1000;
-      isValid = true;
-
-      for (let smallChicken of SmallChicken.smallChickens) {
-        if (Math.abs(smallChicken.x - xPosition) < this.width) {
-          isValid = false;
-          break;
-        }
+  while (!isValid && attempts < 100) {
+    xPosition = 400 + Math.random() * 1500;
+    isValid = true;
+    for (let chicken of Chicken.chickens) {
+      if (Math.abs(chicken.x - xPosition) < this.width) {
+        isValid = false;
+        break;
       }
     }
-    return xPosition;
+    attempts++;
   }
+
+  if (!isValid) {
+    console.warn("Keine gültige Position für Chicken gefunden, nehme letzte Position.");
+  }
+
+  return xPosition;
+}
+
 
   /**
    * Marks the small chicken as dead, updates its image, and plays the hurt sound.
