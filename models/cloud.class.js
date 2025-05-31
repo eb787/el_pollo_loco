@@ -6,7 +6,6 @@ class Cloud extends MovableObject {
     "img/5_background/layers/4_clouds/1.png",
     "img/5_background/layers/4_clouds/2.png",
   ];
-
   currentImageIndex = 0;
 
   constructor() {
@@ -20,7 +19,7 @@ class Cloud extends MovableObject {
     this.animate();
   }
 
-   /**
+  /**
    * Randomly selects the next cloud image from the list and sets it as the current image.
    */
   setRandomImage() {
@@ -36,7 +35,7 @@ class Cloud extends MovableObject {
    * and assigns a new random image.
    */
   animate() {
-     this.setSafeInterval(() => {
+    this.setSafeInterval(() => {
       this.moveLeft();
 
       if (this.x + this.width < 0) {

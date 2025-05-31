@@ -66,7 +66,7 @@ class Character extends MovableObject {
     walking: ["audio/charackter_walking.mp3", 0.2],
     jumping: ["audio/character_jump.mp3", 0.2],
     hurt: ["audio/hurt.mp3", 0.1],
-    idle: ["audio/snore_character.mp3", 0.2],
+    idle: ["audio/snore_character.mp3", 0.1],
     suprise: ["audio/surprise-sound-effect.mp3", 0.2],
   };
   lastMoveTime = Date.now();
@@ -82,9 +82,9 @@ class Character extends MovableObject {
   hasPlayedSurpriseSound = false;
   offset = {
     top: 100,
-    left: 15,
-    right: 20,
-    bottom: 10,
+    left: 40,
+    right: 40,
+    bottom: 20,
   };
 
   /**
@@ -135,7 +135,6 @@ class Character extends MovableObject {
       this.world?.isMuted || false,
       (audio) => SoundHelper.registerSound(audio, this.world?.allSounds || [])
     );
-
     this.snoreSound = this.sounds.idle;
   }
 
@@ -143,20 +142,18 @@ class Character extends MovableObject {
    * Starts character movement based on keyboard input.
    * Calls smaller helper methods for specific input handling.
    */
- startMovementLoop() {
-  this.setSafeInterval(() => {
-    if (this.world?.isGameOver) return;
-    if (this.world?.keyboard.RIGHT) this.moveRightHandler();
-    if (this.world?.keyboard.LEFT) this.moveLeftHandler();
-    if (this.world?.keyboard.SPACE) this.jumpHandler();
-    if (this.world?.keyboard.D) this.handleDKey();
-
-    this.checkSurpriseSound();
-    this.checkIdleSound();
-    this.updateCameraPosition();
-  }, 1000 / 60);
-}
-
+  startMovementLoop() {
+    this.setSafeInterval(() => {
+      if (this.world?.isGameOver) return;
+      if (this.world?.keyboard.RIGHT) this.moveRightHandler();
+      if (this.world?.keyboard.LEFT) this.moveLeftHandler();
+      if (this.world?.keyboard.SPACE) this.jumpHandler();
+      if (this.world?.keyboard.D) this.handleDKey();
+      this.checkSurpriseSound();
+      this.checkIdleSound();
+      this.updateCameraPosition();
+    }, 1000 / 60);
+  }
 
   /**
    * Handles the character's right movement.

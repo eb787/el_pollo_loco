@@ -3,16 +3,13 @@ class Salsa extends MovableObject {
   width = 50;
   height = 80;
   collected = false;
-
   IMAGES_SALSA = [
     "img/6_salsa_bottle/1_salsa_bottle_on_ground.png",
     "img/6_salsa_bottle/2_salsa_bottle_on_ground.png",
   ];
-
   AUDIOS = {
     collect: ["audio/collect_bottle.mp3", 0.3],
   };
-
   offset = {
     top: 10,
     left: 10,
@@ -57,7 +54,7 @@ class Salsa extends MovableObject {
    * Changes image every 200 milliseconds.
    */
   animate() {
-     this.setSafeInterval(() => {
+    this.setSafeInterval(() => {
       this.currentImage = (this.currentImage + 1) % this.IMAGES_SALSA.length;
       this.img = this.imageCache[this.IMAGES_SALSA[this.currentImage]];
     }, 200);

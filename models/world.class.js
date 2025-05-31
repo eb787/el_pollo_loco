@@ -158,25 +158,27 @@ class World {
    * Finally, all bottles marked for removal are filtered out from the throwableObjects array.
    */
   handleBottleHits() {
-    this.throwableObjects.forEach((bottle) => {
-      for (let enemy of this.level.enemies) {
-        if (!bottle.broken && enemy.isColliding(bottle)) {
-          if (bottle.y + bottle.height >= enemy.y + 10) {
-            enemy.hitByBottle();
-            if (enemy instanceof Endboss) {
-              this.endbossStatusBar.setPercentage(enemy.energy);
-            }
-            bottle.broken = true;
-            bottle.startSplash();
-            break;
+  this.throwableObjects.forEach((bottle) => {
+    for (let enemy of this.level.enemies) {
+      if (!bottle.broken && bottle.isColliding(enemy)) {
+        const isSmallEnemy = enemy instanceof SmallChicken;
+        if (isSmallEnemy || bottle.y + bottle.height >= enemy.y) {
+          enemy.hitByBottle();
+          if (enemy instanceof Endboss) {
+            this.endbossStatusBar.setPercentage(enemy.energy);
           }
+          bottle.broken = true;
+          bottle.startSplash();
+          break;
         }
       }
-    });
-    this.throwableObjects = this.throwableObjects.filter(
-      (obj) => !obj.markedForRemoval
-    );
-  }
+    }
+  });
+
+  this.throwableObjects = this.throwableObjects.filter(
+    (obj) => !obj.markedForRemoval
+  );
+}
 
   /**
    * Handles collision between the character and salsa pickups.
@@ -231,28 +233,48 @@ class World {
   }
 
   /**
-   * Handles collision between the character and a chicken enemy.
-   * If the character is falling on the chicken, kills the chicken.
+   * Handles the collision between the character and a chicken enemy.
+   * If the character is falling onto the chicken, the chicken dies and the character bounces.
    * Otherwise, the character takes damage.
    *
-   * @param {Chicken|SmallChicken} chicken - The chicken enemy collided with.
+   * @param {Chicken|SmallChicken} chicken - The chicken enemy that the character has collided with.
    */
   handleChickenCollision(chicken) {
-    let characterBottom = this.character.y + this.character.height;
-    let chickenTop = chicken.y;
-    let isFalling = this.character.speedY < 0;
-
-    if (
-      isFalling &&
-      characterBottom > chickenTop &&
-      characterBottom < chickenTop + chicken.height
-    ) {
+    if (this.isFatalChickenHit(chicken)) {
       chicken.die();
-      this.character.speedY = 20;
+      const newY = chicken.y - this.character.height;
+      if (this.character.y > newY) {
+        this.character.y = newY;
+      }
+      this.character.speedY = 15; 
     } else {
       this.character.hit();
       this.statusBar.setPercentage(this.character.energy);
     }
+  }
+
+  /**
+   * Determines whether the character has landed on the chicken in a way that kills it.
+   * This occurs when the character is falling and lands within a specific vertical and horizontal range of the chicken.
+   *
+   * @param {Chicken|SmallChicken} chicken - The chicken enemy being checked for a fatal collision.
+   * @returns {boolean} True if the collision should result in the chicken's death, false otherwise.
+   */
+  isFatalChickenHit(chicken) {
+    const characterBottom = this.character.y + this.character.height;
+    const characterCenterX = this.character.x + this.character.width / 2;
+    const chickenTop = chicken.y;
+    const chickenLeft = chicken.x;
+    const chickenRight = chicken.x + chicken.width;
+    const isFalling = this.character.speedY < 0;
+    const verticalMargin = chicken instanceof SmallChicken ? 25 : 15;
+    const horizontalHit =
+      characterCenterX > chickenLeft && characterCenterX < chickenRight;
+    const verticalHit =
+      characterBottom > chickenTop - verticalMargin &&
+      characterBottom < chickenTop + chicken.height;
+
+    return isFalling && verticalHit && horizontalHit;
   }
 
   /**

@@ -1,7 +1,7 @@
 class SmallChicken extends MovableObject {
-  y = 370;
-  width = 50;
-  height = 55;
+  y = 355;
+  width = 55;
+  height = 67;
   IMAGES_WALKING = [
     "img/3_enemies_chicken/chicken_small/1_walk/1_w.png",
     "img/3_enemies_chicken/chicken_small/1_walk/2_w.png",
@@ -12,10 +12,10 @@ class SmallChicken extends MovableObject {
     hurt: ["audio/jump_small_chicken.mp3", 0.5],
   };
   offset = {
-    top: 10,
-    left: 10,
-    right: 10,
-    bottom: 10,
+    top: 5,
+    left: 5,
+    right: 5,
+    bottom: 5,
   };
   dead = false;
   static smallChickens = [];
@@ -30,7 +30,7 @@ class SmallChicken extends MovableObject {
     super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
     this.loadImages(this.IMAGES_WALKING);
     this.x = this.getRandomPosition();
-    this.energy = 35;
+    this.energy = 20;
     this.speed = 0.15 + Math.random() * 0.45;
     SmallChicken.smallChickens.push(this);
     this.animate();
@@ -59,41 +59,49 @@ class SmallChicken extends MovableObject {
     );
   }
 
+  /**
+   * Reduces the Endboss' energy by 20 when hit by a bottle.
+   * Ensures energy does not go below zero.
+   * Triggers the death sequence if energy reaches zero and the boss is not already dead.
+   * Records the timestamp of the last bottle hit.
+   */
   hitByBottle() {
     this.energy -= 20;
-    if (this.energy <= 0 && !this.dead) {
+    if (this.energy < 0) this.energy = 0;
+
+    if (this.energy === 0 && !this.dead) {
       this.die();
     }
+    this.lastHitBottle = new Date().getTime();
   }
 
   /**
    * Generates a random x-position for the small chicken, ensuring it doesn't overlap with other small chickens.
    * @returns {number} - The random x-coordinate for the small chicken.
    */
- getRandomPosition() {
-  let xPosition;
-  let isValid = false;
-  let attempts = 0;
+  getRandomPosition() {
+    let xPosition;
+    let isValid = false;
+    let attempts = 0;
 
-  while (!isValid && attempts < 100) {
-    xPosition = 400 + Math.random() * 1500;
-    isValid = true;
-    for (let chicken of Chicken.chickens) {
-      if (Math.abs(chicken.x - xPosition) < this.width) {
-        isValid = false;
-        break;
+    while (!isValid && attempts < 100) {
+      xPosition = 400 + Math.random() * 1500;
+      isValid = true;
+      for (let chicken of Chicken.chickens) {
+        if (Math.abs(chicken.x - xPosition) < this.width) {
+          isValid = false;
+          break;
+        }
       }
+      attempts++;
     }
-    attempts++;
+    if (!isValid) {
+      console.warn(
+        "Keine gültige Position für Chicken gefunden, nehme letzte Position."
+      );
+    }
+    return xPosition;
   }
-
-  if (!isValid) {
-    console.warn("Keine gültige Position für Chicken gefunden, nehme letzte Position.");
-  }
-
-  return xPosition;
-}
-
 
   /**
    * Marks the small chicken as dead, updates its image, and plays the hurt sound.
@@ -110,13 +118,13 @@ class SmallChicken extends MovableObject {
    * Handles the small chicken's movement and animation.
    */
   animate() {
-     this.setSafeInterval(() => {
+    this.setSafeInterval(() => {
       if (!this.dead) {
         this.moveLeft();
       }
     }, 1000 / 60);
 
-     this.setSafeInterval(() => {
+    this.setSafeInterval(() => {
       if (!this.dead) {
         this.playAnimation(this.IMAGES_WALKING);
       }

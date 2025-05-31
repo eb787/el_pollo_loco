@@ -13,8 +13,8 @@ class Chicken extends MovableObject {
   };
   offset = {
     top: 0,
-    left: -10,
-    right: -10,
+    left: 10,
+    right: 10,
     bottom: 0,
   };
   world;
@@ -64,31 +64,28 @@ class Chicken extends MovableObject {
    * Generates a random x-position for the chicken, ensuring it doesn't overlap with other chickens.
    * @returns {number} - The random x-coordinate for the chicken.
    */
-getRandomPosition() {
-  let xPosition;
-  let isValid = false;
-  let attempts = 0;
-
-  while (!isValid && attempts < 100) {
-    xPosition = 1100 + Math.random() * 1400;
-    isValid = true;
-    for (let chicken of Chicken.chickens) {
-      if (Math.abs(chicken.x - xPosition) < this.width) {
-        isValid = false;
-        break;
+  getRandomPosition() {
+    let xPosition;
+    let isValid = false;
+    let attempts = 0;
+    while (!isValid && attempts < 100) {
+      xPosition = 1100 + Math.random() * 1400;
+      isValid = true;
+      for (let chicken of Chicken.chickens) {
+        if (Math.abs(chicken.x - xPosition) < this.width) {
+          isValid = false;
+          break;
+        }
       }
+      attempts++;
     }
-    attempts++;
+    if (!isValid) {
+      console.warn(
+        "Keine gültige Position für Chicken gefunden, nehme letzte Position."
+      );
+    }
+    return xPosition;
   }
-
-  if (!isValid) {
-    console.warn("Keine gültige Position für Chicken gefunden, nehme letzte Position.");
-  }
-
-  return xPosition;
-}
-
-
 
   /**
    * Marks the chicken as dead, updates its image, and plays the hurt sound.
@@ -119,24 +116,23 @@ getRandomPosition() {
     this.lastHitBottle = new Date().getTime();
   }
 
- /**
- * Handles the chicken's movement and animation.
- * Makes the chicken move left and play walking animation when alive.
- */
-animate() {
-  this.setSafeInterval(() => {
-    if (!this.dead) {
-      this.moveLeft();
-    }
-  }, 1000 / 60);
+  /**
+   * Handles the chicken's movement and animation.
+   * Makes the chicken move left and play walking animation when alive.
+   */
+  animate() {
+    this.setSafeInterval(() => {
+      if (!this.dead) {
+        this.moveLeft();
+      }
+    }, 1000 / 60);
 
-  this.setSafeInterval(() => {
-    if (!this.dead) {
-      this.playAnimation(this.IMAGES_WALKING);
-    }
-  }, 200);
-}
-
+    this.setSafeInterval(() => {
+      if (!this.dead) {
+        this.playAnimation(this.IMAGES_WALKING);
+      }
+    }, 200);
+  }
 
   /**
    * Plays the sound when the chicken is hurt.

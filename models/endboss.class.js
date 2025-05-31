@@ -45,9 +45,9 @@ class Endboss extends MovableObject {
     walking: ["audio/endboss_walking.mp3", 0.2],
   };
   offset = {
-    top: 80,
-    left: 10,
-    right: 10,
+    top: 20,
+    left: 20,
+    right: 0,
     bottom: 10,
   };
 
@@ -92,7 +92,7 @@ class Endboss extends MovableObject {
    * dead, hurt, walking towards the character, attacking, or alert.
    */
   animate() {
-     this.setSafeInterval(() => {
+    this.setSafeInterval(() => {
       if (this.world?.isGameOver || !this.character) {
         this.stopWalkSound();
         return;
@@ -104,11 +104,11 @@ class Endboss extends MovableObject {
         this.playHurtSound();
       } else {
         let distance = Math.abs(this.x - this.character.x);
-        if (distance < 450 && distance > 100) {
+        if (distance < 500 && distance > 80) {
           this.moveTowardsCharacter(this.character);
           this.playAnimation(this.IMAGES_WALKING);
           this.playWalkSound();
-        } else if (distance <= 100) {
+        } else if (distance <= 80) {
           this.playAnimation(this.IMAGES_ATTACK);
         } else {
           this.playAnimation(this.IMAGES_ALERT);
@@ -126,10 +126,10 @@ class Endboss extends MovableObject {
   moveTowardsCharacter(character) {
     if (this.x < character.x) {
       this.otherDirection = true;
-      this.x += 20;
+      this.x += 22;
     } else {
       this.otherDirection = false;
-      this.x -= 20;
+      this.x -= 22;
     }
   }
 
@@ -142,9 +142,9 @@ class Endboss extends MovableObject {
     const now = Date.now();
     if (now - this.lastHurtSoundTime > 1000) {
       if (this.sounds.hurt) {
-        this.sounds.hurt.play().catch((e) =>
-          console.warn("Endboss hurt sound blocked:", e)
-        );
+        this.sounds.hurt
+          .play()
+          .catch((e) => console.warn("Endboss hurt sound blocked:", e));
         this.lastHurtSoundTime = now;
       } else {
         console.warn("Endboss hurt sound not found!");
@@ -167,9 +167,9 @@ class Endboss extends MovableObject {
         this.world.backgroundMusic.pause();
       }
 
-      walkingSound.play().catch((e) =>
-        console.warn("Endboss walking sound blocked:", e)
-      );
+      walkingSound
+        .play()
+        .catch((e) => console.warn("Endboss walking sound blocked:", e));
     }
   }
 
@@ -187,9 +187,9 @@ class Endboss extends MovableObject {
         this.world.backgroundMusic.paused &&
         !this.world.isMuted
       ) {
-        this.world.backgroundMusic.play().catch((e) =>
-          console.warn("Background music play error:", e)
-        );
+        this.world.backgroundMusic
+          .play()
+          .catch((e) => console.warn("Background music play error:", e));
       }
     }
   }

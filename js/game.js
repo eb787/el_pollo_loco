@@ -74,7 +74,6 @@ function startGame() {
   bindReloadButton();
 }
 
-
 /**
  * Binds handlers to reload buttons that return to the start screen instead of reloading the page.
  */
@@ -117,7 +116,6 @@ function setupGameAudio() {
     audio.loop = key === "guitar";
     audio.muted = isMuted;
     audioInstances[key] = audio;
-
     world.allSounds ??= [];
     world.allSounds.push(audio);
   }
