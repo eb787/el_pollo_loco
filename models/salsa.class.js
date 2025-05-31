@@ -57,7 +57,7 @@ class Salsa extends MovableObject {
    * Changes image every 200 milliseconds.
    */
   animate() {
-    setInterval(() => {
+     this.setSafeInterval(() => {
       this.currentImage = (this.currentImage + 1) % this.IMAGES_SALSA.length;
       this.img = this.imageCache[this.IMAGES_SALSA[this.currentImage]];
     }, 200);

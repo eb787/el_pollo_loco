@@ -36,7 +36,7 @@ class Cloud extends MovableObject {
    * and assigns a new random image.
    */
   animate() {
-    setInterval(() => {
+     this.setSafeInterval(() => {
       this.moveLeft();
 
       if (this.x + this.width < 0) {

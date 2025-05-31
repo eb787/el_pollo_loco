@@ -18,10 +18,10 @@ class ThrowableObject extends MovableObject {
     splash: ["audio/glassbroken.mp3", 0.2],
   };
   offset = {
-    top: 10,
-    left: 10,
-    right: 10,
-    bottom: 10,
+    top: 5,
+    left: 5,
+    right: 5,
+    bottom: 5,
   };
   animationInterval;
   broken = false;
@@ -43,7 +43,7 @@ class ThrowableObject extends MovableObject {
     this.x = x;
     this.y = y;
     this.throwToLeft = throwToLeft;
-    this.groundLevel = 280;
+    this.groundLevel = 410;
     this.initSounds();
     this.throw(); // Starts movement and animation, but not sound
   }
@@ -98,14 +98,14 @@ class ThrowableObject extends MovableObject {
    * Movement after throw: flies left or right.
    * Continuously checks if the bottle is broken.
    */
-  startMove() {
-    const moveInterval = setInterval(() => {
+   startMove() {
+    this.setSafeInterval(() => {
       this.x += this.throwToLeft ? -10 : 10;
 
       if (this.broken) {
         this.stopThrowSound();
         this.playSplashSound();
-        clearInterval(moveInterval);
+        this.clearAllIntervals();
       }
     }, 25);
   }
@@ -135,33 +135,39 @@ class ThrowableObject extends MovableObject {
   /**
    * Starts the throw rotation animation.
    */
-  startAnimation() {
-    this.animationInterval = setInterval(() => {
-      if (!this.broken && this.y >= this.groundLevel) {
-        this.startSplash();
-      }
-      if (!this.broken) {
-        this.playAnimation(this.IMAGE_BOTTLE);
-      }
-    }, 80);
-  }
+startAnimation() {
+  this.setSafeInterval(() => {
+    if (!this.broken && this.y + this.height >= this.groundLevel) {
+      this.startSplash();
+    }
+    if (!this.broken) {
+      this.playAnimation(this.IMAGE_BOTTLE);
+    }
+  }, 80);
+}
+
+
 
   /**
    * Starts the splash animation once the ground is hit.
    */
-  startSplash() {
-    this.broken = true;
-    this.currentImage = 0;
-    this.playSplashSound();
+ startSplash() {
+  this.broken = true;
+  this.currentImage = 0;
 
-    clearInterval(this.animationInterval);
-    this.animationInterval = setInterval(() => {
-      if (this.currentImage < this.IMAGE_BOTTLE_SPLASH.length) {
-        this.playAnimation(this.IMAGE_BOTTLE_SPLASH);
-      } else {
-        clearInterval(this.animationInterval);
-        this.markedForRemoval = true;
-      }
-    }, 80);
-  }
+  this.stopThrowSound();     
+  this.playSplashSound();  
+
+  this.intervalIds.forEach(clearInterval);
+  this.intervalIds = [];
+
+  const splashInterval = this.setSafeInterval(() => {
+    if (this.currentImage < this.IMAGE_BOTTLE_SPLASH.length) {
+      this.playAnimation(this.IMAGE_BOTTLE_SPLASH);
+    } else {
+      clearInterval(splashInterval); 
+      this.markedForRemoval = true;
+    }
+  }, 80);
+}
 }

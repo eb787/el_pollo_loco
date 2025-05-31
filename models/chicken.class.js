@@ -110,23 +110,24 @@ class Chicken extends MovableObject {
     this.lastHitBottle = new Date().getTime();
   }
 
-  /**
-   * Handles the chicken's movement and animation.
-   * Makes the chicken move left and play walking animation when alive.
-   */
-  animate() {
-    this.movementInterval = setInterval(() => {
-      if (!this.dead) {
-        this.moveLeft();
-      }
-    }, 1000 / 60);
+ /**
+ * Handles the chicken's movement and animation.
+ * Makes the chicken move left and play walking animation when alive.
+ */
+animate() {
+  this.setSafeInterval(() => {
+    if (!this.dead) {
+      this.moveLeft();
+    }
+  }, 1000 / 60);
 
-    this.walkAnimationInterval = setInterval(() => {
-      if (!this.dead) {
-        this.playAnimation(this.IMAGES_WALKING);
-      }
-    }, 200);
-  }
+  this.setSafeInterval(() => {
+    if (!this.dead) {
+      this.playAnimation(this.IMAGES_WALKING);
+    }
+  }, 200);
+}
+
 
   /**
    * Plays the sound when the chicken is hurt.

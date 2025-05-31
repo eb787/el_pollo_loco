@@ -92,7 +92,7 @@ class Endboss extends MovableObject {
    * dead, hurt, walking towards the character, attacking, or alert.
    */
   animate() {
-    setInterval(() => {
+     this.setSafeInterval(() => {
       if (this.world?.isGameOver || !this.character) {
         this.stopWalkSound();
         return;

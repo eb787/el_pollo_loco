@@ -10,6 +10,7 @@ class World {
   salsaStatusBar = new SalsaStatusBar();
   endbossStatusBar = new EndbossStatusBar();
   throwableObjects = [];
+  intervalIds = [];
   isGameOver = false;
   characterRecentlyHit = false;
   allSounds = [];
@@ -158,19 +159,20 @@ class World {
    */
   handleBottleHits() {
     this.throwableObjects.forEach((bottle) => {
-      for (let enemy of world.level.enemies) {
-        if (enemy.isColliding(bottle)) {
-          enemy.hitByBottle();
-          if (enemy instanceof Endboss) {
-            this.endbossStatusBar.setPercentage(enemy.energy);
+      for (let enemy of this.level.enemies) {
+        if (!bottle.broken && enemy.isColliding(bottle)) {
+          if (bottle.y + bottle.height >= enemy.y + 10) {
+            enemy.hitByBottle();
+            if (enemy instanceof Endboss) {
+              this.endbossStatusBar.setPercentage(enemy.energy);
+            }
+            bottle.broken = true;
+            bottle.startSplash();
+            break;
           }
-          bottle.startSplash();
-          bottle.markedForRemoval = true;
-          break; // Prevents a bottle from hitting multiple enemies
         }
       }
     });
-    // Remove bottles that are marked for removal from the array
     this.throwableObjects = this.throwableObjects.filter(
       (obj) => !obj.markedForRemoval
     );
@@ -292,7 +294,7 @@ class World {
     this.addToMap(this.endbossStatusBar);
 
     this.animationFrameId = requestAnimationFrame(() => {
-  this.draw();
+      this.draw();
     });
   }
 
@@ -344,20 +346,22 @@ class World {
   }
 
   /**
-   * Creates and stores an interval ID to manage repeating functions safely.
+   * Sets a safe interval and keeps track of its ID for later cleanup.
+   * This ensures that all intervals can be cleared easily when the game stops.
    *
-   * @param {Function} fn - The function to execute repeatedly.
+   * @param {Function} fn - The function to be executed repeatedly.
    * @param {number} time - The interval time in milliseconds.
-   * @returns {number} The interval ID.
+   * @returns {number} The ID of the interval.
    */
   setSafeInterval(fn, time) {
-    let id = setInterval(fn, time);
+    const id = setInterval(fn, time);
     this.intervalIds.push(id);
     return id;
   }
 
   /**
-   * Clears all stored intervals to stop repeating functions.
+   * Clears all intervals that were set using setSafeInterval.
+   * Useful for stopping all repeating actions when the game ends.
    */
   clearAllIntervals() {
     this.intervalIds.forEach(clearInterval);
@@ -368,74 +372,68 @@ class World {
    * Stops the game by clearing intervals, stopping sounds,
    * and marking the game as over.
    */
-stopGame() {
-  this.clearAllIntervals(); 
-  if (this.animationFrameId) {
-    cancelAnimationFrame(this.animationFrameId); 
-    this.animationFrameId = null;
-  }
-  this.stopAllSounds();
-  this.isGameOver = true;
-}
+  stopGame() {
+    console.log(
+      "stopGame called, clearing intervals:",
+      this.intervalIds.length
+    );
 
-cleanup() {
-  this.stopGame();
-  this.character = null;
-  this.level = null;
-  this.statusBar = null;
-  this.coinStatusBar = null;
-  this.salsaStatusBar = null;
-  this.endbossStatusBar = null;
-  this.throwableObjects = [];
-  this.allSounds = [];
-  this.keyboard = null;
-  this.ctx = null;
-  this.canvas = null;
-}
+    this.level.enemies.forEach((enemy) => enemy.clearAllIntervals());
+    this.throwableObjects.forEach((obj) => obj.clearAllIntervals());
+    this.character.clearAllIntervals();
+
+    this.clearAllIntervals();
+
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+
+    this.stopAllSounds();
+
+    this.isGameOver = true;
+  }
+
+  cleanup() {
+    this.stopGame();
+    this.character = null;
+    this.level = null;
+    this.statusBar = null;
+    this.coinStatusBar = null;
+    this.salsaStatusBar = null;
+    this.endbossStatusBar = null;
+    this.throwableObjects = [];
+    this.allSounds = [];
+    this.keyboard = null;
+    this.ctx = null;
+    this.canvas = null;
+  }
 
   /**
    * Stops all playing sounds including background music and other audios.
    */
-stopAllSounds() {
-  if (this.backgroundMusic && !this.backgroundMusic.paused) {
-    this.backgroundMusic.pause();
-    this.backgroundMusic.currentTime = 0;
-  }
-
-  if (this.allSounds) {
-    this.allSounds.forEach((audio) => {
-      // Win-/Lose-Sound NICHT stoppen
-      if (
-        audio === this.sounds?.win ||
-        audio === this.sounds?.lose
-      ) return;
-
-      if (audio && !audio.paused) {
-        audio.pause();
-        audio.currentTime = 0;
-      }
-    });
-  }
-}
-
-initSounds() {
-  this.sounds = SoundHelper.initSounds(
-    this.AUDIOS,
-    this.isMuted,
-    (audio) => SoundHelper.registerSound(audio, this.allSounds)
-  );
-}
-
-  onMuteChange(isMuted) {
-    if (this.backgroundMusic) {
-      this.backgroundMusic.muted = isMuted;
+  stopAllSounds() {
+    if (this.backgroundMusic && !this.backgroundMusic.paused) {
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
     }
+
     if (this.allSounds) {
       this.allSounds.forEach((audio) => {
-        audio.muted = isMuted;
+        if (audio === this.sounds?.win || audio === this.sounds?.lose) return;
+
+        if (audio && !audio.paused) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
       });
     }
-    this.isMuted = isMuted;
+  }
+
+  initSounds() {
+    this.sounds = SoundHelper.initSounds(this.AUDIOS, this.isMuted, (audio) =>
+      SoundHelper.registerSound(audio, this.allSounds)
+    );
   }
 
   /**
@@ -477,27 +475,27 @@ initSounds() {
    * - Draws win image on canvas
    * - Stops the game and shows restart button
    */
- showWinScreen() {
-  if (this.backgroundMusic) {
-    this.backgroundMusic.pause();
-    this.backgroundMusic.currentTime = 0;
+  showWinScreen() {
+    if (this.backgroundMusic) {
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
+    }
+    if (!this.isMuted && this.sounds?.win) {
+      this.sounds.win.currentTime = 0;
+      this.sounds.win
+        .play()
+        .catch((e) => console.warn("Win sound blocked:", e));
+    }
+    let winImage = new Image();
+    winImage.src = "img/You won, you lost/You won A.png";
+    winImage.onload = () => {
+      let ctx = this.ctx;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(winImage, 0, 0, canvas.width, canvas.height);
+    };
+    this.stopGame();
+    this.showRestartButton();
   }
-  if (!this.isMuted && this.sounds?.win) {
-    this.sounds.win.currentTime = 0;
-    this.sounds.win.play().catch((e) =>
-      console.warn("Win sound blocked:", e)
-    );
-  }
-  let winImage = new Image();
-  winImage.src = "img/You won, you lost/You won A.png";
-  winImage.onload = () => {
-    let ctx = this.ctx;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(winImage, 0, 0, canvas.width, canvas.height);
-  };
-  this.stopGame();
-  this.showRestartButton();
-}
 
   /**
    * Displays the lose screen:
@@ -506,27 +504,27 @@ initSounds() {
    * - Draws lose image on canvas
    * - Stops the game and shows restart button
    */
- showLoseScreen() {
-  if (this.backgroundMusic) {
-    this.backgroundMusic.pause();
-    this.backgroundMusic.currentTime = 0;
+  showLoseScreen() {
+    if (this.backgroundMusic) {
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
+    }
+    if (!this.isMuted && this.sounds?.lose) {
+      this.sounds.lose.currentTime = 0;
+      this.sounds.lose
+        .play()
+        .catch((e) => console.warn("Lose sound blocked:", e));
+    }
+    let loseImage = new Image();
+    loseImage.src = "img/You won, you lost/You lost.png";
+    loseImage.onload = () => {
+      let ctx = this.ctx;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(loseImage, 0, 0, canvas.width, canvas.height);
+    };
+    this.stopGame();
+    this.showRestartButton();
   }
-  if (!this.isMuted && this.sounds?.lose) {
-    this.sounds.lose.currentTime = 0;
-    this.sounds.lose.play().catch((e) =>
-      console.warn("Lose sound blocked:", e)
-    );
-  }
-  let loseImage = new Image();
-  loseImage.src = "img/You won, you lost/You lost.png";
-  loseImage.onload = () => {
-    let ctx = this.ctx;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(loseImage, 0, 0, canvas.width, canvas.height);
-  };
-  this.stopGame();
-  this.showRestartButton();
-}
 
   /**
    * Shows the restart button and reloads the page when clicked.
@@ -534,9 +532,19 @@ initSounds() {
  showRestartButton() {
   const btn = document.getElementById("restartBtn");
   btn.style.display = "block";
-  btn.onclick = () => {
-    btn.style.display = "none"; 
-    restartGame(); 
+
+  // Falls es schon einen Listener gibt, entfernen wir ihn
+  if (this._restartHandler) {
+    btn.removeEventListener("click", this._restartHandler);
+  }
+
+  // Event Handler als Property speichern, damit removeEventListener funktioniert
+  this._restartHandler = () => {
+    btn.style.display = "none";
+    restartGame();
   };
+
+  btn.addEventListener("click", this._restartHandler);
 }
+
 }

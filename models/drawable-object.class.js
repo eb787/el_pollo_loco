@@ -1,6 +1,7 @@
 class DrawableObject {
   img;
   imageCache = {};
+  intervalIds = [];
   currentImage = 0;
   x = 50;
   y = 225;
@@ -32,6 +33,29 @@ class DrawableObject {
       img.src = path;
       this.imageCache[path] = img;
     });
+  }
+
+  /**
+   * Sets a safe interval and keeps track of its ID for later cleanup.
+   * This ensures that all intervals can be cleared easily when the game stops.
+   *
+   * @param {Function} fn - The function to be executed repeatedly.
+   * @param {number} time - The interval time in milliseconds.
+   * @returns {number} The ID of the interval.
+   */
+  setSafeInterval(fn, time) {
+    const id = setInterval(fn, time);
+    this.intervalIds.push(id);
+    return id;
+  }
+
+  /**
+   * Clears all intervals that were set using setSafeInterval.
+   * Useful for stopping all repeating actions when the game ends.
+   */
+  clearAllIntervals() {
+    this.intervalIds.forEach(clearInterval);
+    this.intervalIds = [];
   }
 
   /**

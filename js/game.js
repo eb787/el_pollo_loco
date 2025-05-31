@@ -19,12 +19,10 @@ let AUDIOS = {
 function init() {
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext("2d");
-
   startScreenImage.onload = () => {
     drawStartScreen();
     setupStartListener();
   };
-
   if (startScreenImage.complete) {
     drawStartScreen();
     setupStartListener();
@@ -62,6 +60,10 @@ function startGameOnce() {
  * Starts the game by initializing the level, the game world, and other components.
  */
 function startGame() {
+  if (world) {
+    world.cleanup();
+    world = null;
+  }
   initLevel1();
   world = new World(canvas, keyboard);
   world.isMuted = isMuted;
@@ -69,6 +71,8 @@ function startGame() {
   setupMobileControls();
   bindReloadButton();
 }
+
+
 
 /**
  * Configures and plays game audio including background music and SFX.
@@ -258,27 +262,44 @@ function setupMobileControls() {
 /**
  * Restarts the game by clearing the current world and creating a new one.
  */
+let isRestarting = false;
+
 function restartGame() {
+  if (isRestarting) return;
+  isRestarting = true;
+
+  console.log('Creating new world instance');
+
   if (world) {
-    world.cleanup();
+    world.stopGame();
     world = null;
   }
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   initLevel1();
+
   world = new World(canvas, keyboard);
   world.isMuted = isMuted;
-  world.backgroundMusic = new Audio("audio/guitar.mp3");
-  world.backgroundMusic.loop = true;
-  world.backgroundMusic.volume = 0.1;
-  world.backgroundMusic.muted = isMuted;
+  world.isStopping = false;
+  world.isGameOver = false;
 
-  world.backgroundMusic.play().catch((error) =>
-    console.warn("Autoplay prevented:", error)
-  );
+  const bgMusic = new Audio("audio/guitar.mp3");
+  bgMusic.loop = true;
+  bgMusic.volume = 0.1;
+  bgMusic.muted = isMuted;
+  world.backgroundMusic = bgMusic;
 
   if (!world.allSounds) world.allSounds = [];
-  world.allSounds.push(world.backgroundMusic);
+  world.allSounds.push(bgMusic);
+
+  bgMusic.play().catch((err) => console.warn("Autoplay prevented", err));
 
   setupMobileControls();
+
+  isRestarting = false;
 }
+
+
+
+

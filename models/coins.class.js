@@ -56,7 +56,7 @@ class Coins extends MovableObject {
    * Cycles through the coin images every 200 milliseconds.
    */
   animate() {
-    setInterval(() => {
+     this.setSafeInterval(() => {
       this.currentImage = (this.currentImage + 1) % this.IMAGES_COIN.length;
       this.img = this.imageCache[this.IMAGES_COIN[this.currentImage]];
     }, 200);

@@ -66,7 +66,7 @@ class Character extends MovableObject {
     walking: ["audio/charackter_walking.mp3", 0.2],
     jumping: ["audio/character_jump.mp3", 0.2],
     hurt: ["audio/hurt.mp3", 0.1],
-    idle: ["audio/snore_character.mp3", 0.1],
+    idle: ["audio/snore_character.mp3", 0.2],
     suprise: ["audio/surprise-sound-effect.mp3", 0.2],
   };
   lastMoveTime = Date.now();
@@ -144,7 +144,7 @@ class Character extends MovableObject {
    * Calls smaller helper methods for specific input handling.
    */
  startMovementLoop() {
-  setInterval(() => {
+  this.setSafeInterval(() => {
     if (this.world?.isGameOver) return;
     if (this.world?.keyboard.RIGHT) this.moveRightHandler();
     if (this.world?.keyboard.LEFT) this.moveLeftHandler();
@@ -241,7 +241,7 @@ class Character extends MovableObject {
    * Plays the appropriate animation depending on state (dead, hurt, jumping, walking, or idle).
    */
   startAnimationLoop() {
-    setInterval(() => {
+    this.setSafeInterval(() => {
       if (this.isDead()) {
         this.handleDeadAnimation();
         return;

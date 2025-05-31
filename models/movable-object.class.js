@@ -19,14 +19,14 @@ class MovableObject extends DrawableObject {
    * Applies gravity to the object by continuously updating its vertical position.
    * @memberof MovableObject
    */
-  applyGravity() {
-    setInterval(() => {
-      if (this.isAboveGround() || this.speedY > 0) {
-        this.y -= this.speedY;
-        this.speedY -= this.acceleration;
-      }
-    }, 1000 / 25);
-  }
+ applyGravity() {
+  this.setSafeInterval(() => {
+    if (this.isAboveGround() || this.speedY > 0) {
+      this.y -= this.speedY;
+      this.speedY -= this.acceleration;
+    }
+  }, 1000 / 25);
+}
 
   /**
    * Checks if the object is above the ground.
@@ -47,7 +47,7 @@ class MovableObject extends DrawableObject {
    * @returns {boolean} - Returns true if the objects are colliding.
    */
 isColliding(mo) {
-  const buffer = 5;
+  const buffer = 2;
 
   const a_left = this.x + this.offset.left - buffer;
   const a_right = this.x + this.width - this.offset.right + buffer;

@@ -103,13 +103,13 @@ class SmallChicken extends MovableObject {
    * Handles the small chicken's movement and animation.
    */
   animate() {
-    setInterval(() => {
+     this.setSafeInterval(() => {
       if (!this.dead) {
         this.moveLeft();
       }
     }, 1000 / 60);
 
-    setInterval(() => {
+     this.setSafeInterval(() => {
       if (!this.dead) {
         this.playAnimation(this.IMAGES_WALKING);
       }
