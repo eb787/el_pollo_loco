@@ -61,7 +61,6 @@ class Character extends MovableObject {
     "img/2_character_pepe/1_idle/long_idle/I-19.png",
     "img/2_character_pepe/1_idle/long_idle/I-20.png",
   ];
-
   AUDIOS = {
     walking: ["audio/charackter_walking.mp3", 0.2],
     jumping: ["audio/character_jump.mp3", 0.2],
@@ -74,7 +73,7 @@ class Character extends MovableObject {
   lastThrowTime = 0;
   lastHurtSoundTime = 0;
   hurtSoundCooldown = 1000;
-  throwCooldown = 700;
+  throwCooldown = 1000;
   lastWalkSoundTime = 0;
   walkSoundCooldown = 10;
   lastSnoreSoundTime = 0;
@@ -242,12 +241,10 @@ class Character extends MovableObject {
       if (this.isDead()) {
         this.handleDeadAnimation();
         return;
-      }
-      if (this.isHurt()) {
+      }if (this.isHurt()) {
         this.handleHurtAnimation();
         return;
-      }
-      if (this.isAboveGround()) {
+      } if (this.isAboveGround()) {
         this.handleJumpingAnimation();
       } else if (this.world?.keyboard?.RIGHT || this.world?.keyboard?.LEFT) {
         this.handleWalkingAnimation();

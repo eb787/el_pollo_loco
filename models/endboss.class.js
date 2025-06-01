@@ -4,6 +4,11 @@ class Endboss extends MovableObject {
   y = 5;
   energy = 100;
   world;
+  lastHitTime = 0;
+  isInvincible = false;
+  isCurrentlyHurt = false;
+  isCurrentlyHurt = false;
+  isAggressive = false;
   IMAGES_ALERT = [
     "img/4_enemie_boss_chicken/2_alert/G5.png",
     "img/4_enemie_boss_chicken/2_alert/G6.png",
@@ -99,9 +104,11 @@ class Endboss extends MovableObject {
       }
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
-      } else if (this.isHurtByBottle()) {
+      } else if (this.isCurrentlyHurt) {
         this.playAnimation(this.IMAGES_HURT);
-        this.playHurtSound();
+      } else if (this.isAggressive) {
+        this.sprintTowardsCharacter(this.character);
+        this.playAnimation(this.IMAGES_ATTACK);
       } else {
         let distance = Math.abs(this.x - this.character.x);
         if (distance < 500 && distance > 80) {
@@ -130,6 +137,63 @@ class Endboss extends MovableObject {
     } else {
       this.otherDirection = false;
       this.x -= 22;
+    }
+  }
+
+  /**
+   * Applies damage to the Endboss if it is not currently invincible.
+   * Decreases energy by 20, triggers hurt animation and sound,
+   * applies a knockback effect, and sets temporary invincibility.
+   * After 500ms, the Endboss stops being hurt and becomes aggressive.
+   * After 1300ms, the Endboss becomes vulnerable again (invincibility ends).
+   */
+  hurt() {
+    const now = Date.now();
+    if (this.isInvincible || this.energy <= 0) return;
+    this.energy -= 20;
+    this.lastHitTime = now;
+    this.isInvincible = true;
+    this.isCurrentlyHurt = true;
+    this.playHurtSound();
+    this.x += this.otherDirection ? -40 : 40;
+    setTimeout(() => {
+      this.isCurrentlyHurt = false;
+      this.becomeAggressive();
+    }, 500);
+    setTimeout(() => {
+      this.isInvincible = false;
+    }, 1300);
+  }
+
+  /**
+   * Sets the Endboss into an aggressive state.
+   * The aggressive state lasts for 2000ms (2 seconds),
+   * during which the Endboss might behave more offensively.
+   */
+  becomeAggressive() {
+    this.isAggressive = true;
+    setTimeout(() => {
+      this.isAggressive = false;
+    }, 2000);
+  }
+
+  /**
+   * Moves the Endboss quickly towards the character's position.
+   * If the Endboss is to the left of the character, it moves right and faces left.
+   * If it is to the right of the character, it moves left and faces right.
+   * The movement speed is fixed at 40 units per call.
+   *
+   * @param {Object} character - The character object to sprint towards.
+   * @param {number} character.x - The x-coordinate of the character.
+   */
+  sprintTowardsCharacter(character) {
+    const speed = 40; // Sprint speed
+    if (this.x < character.x) {
+      this.otherDirection = true;
+      this.x += speed;
+    } else {
+      this.otherDirection = false;
+      this.x -= speed;
     }
   }
 

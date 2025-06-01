@@ -154,7 +154,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const muteBtnMobile = document.getElementById("muteBtn_mobile");
   if (muteBtnMobile) muteBtnMobile.addEventListener("click", toggleMute);
+
+  // ✅ Orientation check wird jetzt sicher nach DOM-Load ausgeführt
+  checkOrientation();
+  window.addEventListener("resize", checkOrientation);
+  window.addEventListener("orientationchange", checkOrientation);
 });
+
 
 /**
  * Updates all sound objects with the new mute state.
@@ -330,3 +336,28 @@ function restartGame() {
   setupAndStartGame(canvas, keyboard, isMuted);
   isRestarting = false;
 }
+
+/**
+ * Returns true if the user is on a mobile device.
+ */
+function isMobileDevice() {
+  return /Mobi|Android/i.test(navigator.userAgent);
+}
+
+/**
+ * Shows or hides the rotate overlay depending on orientation and device.
+ */
+function checkOrientation() {
+  const overlay = document.getElementById('rotateOverlay');
+  if (!overlay) return;
+
+  const isPortrait = window.innerHeight > window.innerWidth;
+
+  if (isPortrait && isMobileDevice()) {
+    overlay.classList.add('show');
+  } else {
+    overlay.classList.remove('show');
+  }
+}
+
+

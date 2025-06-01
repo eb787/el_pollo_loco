@@ -81,7 +81,7 @@ class Chicken extends MovableObject {
     }
     if (!isValid) {
       console.warn(
-        "Keine gültige Position für Chicken gefunden, nehme letzte Position."
+        "No valid position found for Chicken, using last known position."
       );
     }
     return xPosition;

@@ -10,6 +10,7 @@
     <script src="models/drawable-object.class.js"></script>
     <script src="models/movable-object.class.js"></script>
     <script src="models/throwable-oject.class.js"></script>
+    <script src="models/collision-handler.class.js"></script>
     <script src="models/sound-helper.class.js"></script>
     <script src="models/cloud.class.js"></script>
     <script src="models/character.class.js"></script>
@@ -54,21 +55,20 @@
                 <div id="button_reload_mobile" class="div_rules_hover"><img src="./img/renew.svg"></div>
             </div>
             <div class="buttons_right">
-                <div id="button_right_mobile" class="div_rules"> <img src="./img/arrow_forward.svg"
-                        alt="arrow_forward">
+                <div id="button_right_mobile" class="div_rules"> <img src="./img/arrow_forward.svg" alt="arrow_forward">
                 </div>
-                 <div id="button_throw_mobile" class="div_rules">throw</div>
-                <div id="muteBtn_mobile" class="div_rules_hover"  tabindex="-1">
+                <div id="button_throw_mobile" class="div_rules">throw</div>
+                <div id="muteBtn_mobile" class="div_rules_hover" tabindex="-1">
                     <img src="./img/sound_on.svg" alt="mute on">
                 </div>
-               
-                
             </div>
         </div>
     </div>
     <button id="restartBtn" class="restartBtn" style="display: none;">Spiel neu starten</button>
     <a class="div-impressum" href="impressum.html">Impressum</a>
-
+    <div id="rotateOverlay">
+        <p>Please turn your device</p>
+    </div>
 </body>
 
 </html>

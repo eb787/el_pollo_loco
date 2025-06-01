@@ -12,7 +12,6 @@ class World {
   throwableObjects = [];
   intervalIds = [];
   isGameOver = false;
-  characterRecentlyHit = false;
   allSounds = [];
   AUDIOS = {
     win: ["audio/win.mp3", 0.5],
@@ -39,6 +38,7 @@ class World {
     this.draw();
     this.run();
     this.initSounds();
+    this.collisionHandler = new CollisionHandler(this);
   }
 
   /**
@@ -48,8 +48,8 @@ class World {
   run() {
     if (!this.isGameOver) {
       this.setSafeInterval(() => {
-        this.checkThrowObjects();
-        this.checkCollisions();
+        this.collisionHandler.checkThrowObjects(); // NEU
+        this.collisionHandler.checkCollisions();
       }, 70);
     }
   }
@@ -72,6 +72,10 @@ class World {
     objectLists.forEach((list) => this.assignWorldAndSounds(list));
   }
 
+  checkCollisions() {
+    this.collisionHandler.checkCollisions();
+  }
+
   /**
    * Assigns the world reference and initializes sounds for each object in the array.
    * If the object is an Endboss, assigns the character reference as well.
@@ -89,208 +93,6 @@ class World {
         obj.initSounds();
       }
     });
-  }
-
-  /**
-   * Checks if the character can throw a bottle and throws one if possible.
-   */
-  checkThrowObjects() {
-    let now = Date.now();
-    if (this.canThrowBottle(now)) {
-      this.character.lastThrowTime = now;
-      this.throwBottle();
-    }
-  }
-
-  /**
-   * Checks whether the character is allowed to throw a bottle.
-   * Conditions:
-   * - The "D" key is pressed
-   * - The character has salsa bottles left
-   * - Enough time has passed since the last throw
-   *
-   * @param {number} now - Current timestamp in milliseconds
-   * @returns {boolean} True if the character can throw a bottle.
-   */
-  canThrowBottle(now) {
-    return (
-      this.keyboard.D &&
-      this.character.salsa > 0 &&
-      now - this.character.lastThrowTime > this.character.throwCooldown
-    );
-  }
-
-  /**
-   * Creates and throws a new bottle:
-   * - Sets its position and direction
-   * - Starts the throw animation and sound
-   * - Adds it to the world and updates the throwableObjects array
-   */
-  throwBottle() {
-    const x = this.character.x + 50;
-    const y = this.character.y + 100;
-    const throwToLeft = this.character.otherDirection;
-    const bottle = new ThrowableObject(x, y, throwToLeft);
-    bottle.world = this;
-    bottle.initSounds();
-    bottle.startThrowWithSound();
-    this.throwableObjects.push(bottle);
-    this.character.salsa--;
-    this.salsaStatusBar.setPercentage(this.character.salsa * 20);
-  }
-
-  /**
-   * Checks for all types of collisions between the character,
-   * enemies, coins, salsa, and thrown objects.
-   */
-  checkCollisions() {
-    this.handleBottleHits();
-    this.handleCoinCollision();
-    this.handleSalsaCollision();
-    this.handleEnemyCollisions();
-  }
-
-  /**
-   * Checks for collisions between throwable objects (bottles) and enemies.
-   * If a bottle hits an enemy, the enemy takes damage.
-   * If the enemy is the Endboss, the boss status bar is updated accordingly.
-   * The bottle plays its splash animation and is marked for removal after hitting an enemy.
-   * Finally, all bottles marked for removal are filtered out from the throwableObjects array.
-   */
-  handleBottleHits() {
-  this.throwableObjects.forEach((bottle) => {
-    for (let enemy of this.level.enemies) {
-      if (!bottle.broken && bottle.isColliding(enemy)) {
-        const isSmallEnemy = enemy instanceof SmallChicken;
-        if (isSmallEnemy || bottle.y + bottle.height >= enemy.y) {
-          enemy.hitByBottle();
-          if (enemy instanceof Endboss) {
-            this.endbossStatusBar.setPercentage(enemy.energy);
-          }
-          bottle.broken = true;
-          bottle.startSplash();
-          break;
-        }
-      }
-    }
-  });
-
-  this.throwableObjects = this.throwableObjects.filter(
-    (obj) => !obj.markedForRemoval
-  );
-}
-
-  /**
-   * Handles collision between the character and salsa pickups.
-   * Plays sound, updates character salsa count, and status bar.
-   */
-  handleSalsaCollision() {
-    this.level.salsa.forEach((salsa, index) => {
-      if (this.character.isColliding(salsa)) {
-        if (!this.isMuted) {
-          salsa.playCollectSalsaSound();
-        }
-        this.character.collectSalsa();
-        this.level.salsa.splice(index, 1);
-        this.salsaStatusBar.setPercentage(this.character.salsa * 20);
-      }
-    });
-  }
-
-  /**
-   * Handles collision between the character and coins.
-   * Plays sound, updates character coins count, and status bar.
-   */
-  handleCoinCollision() {
-    this.level.coins.forEach((coin, index) => {
-      if (this.character.isColliding(coin)) {
-        if (!this.isMuted) {
-          coin.playCollectSound();
-        }
-        this.character.collectCoin();
-        this.level.coins.splice(index, 1);
-        this.coinStatusBar.setPercentage(this.character.coins * 20);
-      }
-    });
-  }
-
-  /**
-   * Handles collisions between the character and enemies.
-   * Differentiates behavior for chickens and the Endboss.
-   */
-  handleEnemyCollisions() {
-    for (let enemy of this.level.enemies) {
-      if (enemy.dead) continue;
-      if (this.character.isColliding(enemy)) {
-        if (enemy instanceof Chicken || enemy instanceof SmallChicken) {
-          this.handleChickenCollision(enemy);
-        }
-        if (enemy instanceof Endboss) {
-          this.handleEndbossCollision(enemy);
-        }
-      }
-    }
-  }
-
-  /**
-   * Handles the collision between the character and a chicken enemy.
-   * If the character is falling onto the chicken, the chicken dies and the character bounces.
-   * Otherwise, the character takes damage.
-   *
-   * @param {Chicken|SmallChicken} chicken - The chicken enemy that the character has collided with.
-   */
-  handleChickenCollision(chicken) {
-    if (this.isFatalChickenHit(chicken)) {
-      chicken.die();
-      const newY = chicken.y - this.character.height;
-      if (this.character.y > newY) {
-        this.character.y = newY;
-      }
-      this.character.speedY = 15; 
-    } else {
-      this.character.hit();
-      this.statusBar.setPercentage(this.character.energy);
-    }
-  }
-
-  /**
-   * Determines whether the character has landed on the chicken in a way that kills it.
-   * This occurs when the character is falling and lands within a specific vertical and horizontal range of the chicken.
-   *
-   * @param {Chicken|SmallChicken} chicken - The chicken enemy being checked for a fatal collision.
-   * @returns {boolean} True if the collision should result in the chicken's death, false otherwise.
-   */
-  isFatalChickenHit(chicken) {
-    const characterBottom = this.character.y + this.character.height;
-    const characterCenterX = this.character.x + this.character.width / 2;
-    const chickenTop = chicken.y;
-    const chickenLeft = chicken.x;
-    const chickenRight = chicken.x + chicken.width;
-    const isFalling = this.character.speedY < 0;
-    const verticalMargin = chicken instanceof SmallChicken ? 25 : 15;
-    const horizontalHit =
-      characterCenterX > chickenLeft && characterCenterX < chickenRight;
-    const verticalHit =
-      characterBottom > chickenTop - verticalMargin &&
-      characterBottom < chickenTop + chicken.height;
-
-    return isFalling && verticalHit && horizontalHit;
-  }
-
-  /**
-   * Handles collision between the character and the Endboss.
-   * Prevents repeated damage within a short cooldown.
-   */
-  handleEndbossCollision() {
-    if (!this.characterRecentlyHit) {
-      this.character.hitEndboss();
-      this.statusBar.setPercentage(this.character.energy);
-      this.characterRecentlyHit = true;
-
-      setTimeout(() => {
-        this.characterRecentlyHit = false;
-      }, 1000);
-    }
   }
 
   /**
@@ -321,7 +123,6 @@ class World {
 
   /**
    * Adds multiple game objects to the canvas map.
-   *
    * @param {Array} objects - Array of drawable game objects.
    */
   addObjectsToMap(objects) {
@@ -332,7 +133,6 @@ class World {
 
   /**
    * Draws a single game object on the canvas, flipping it if necessary.
-   *
    * @param {Object} mo - The movable object to draw.
    */
   addToMap(mo) {
@@ -347,7 +147,6 @@ class World {
 
   /**
    * Flips the canvas context horizontally to mirror the image.
-   *
    * @param {Object} mo - The movable object to flip.
    */
   flipImage(mo) {
@@ -358,7 +157,6 @@ class World {
 
   /**
    * Restores the canvas context after flipping the image.
-   *
    * @param {Object} mo - The movable object to flip back.
    */
   flipImageBack(mo) {
@@ -369,7 +167,6 @@ class World {
   /**
    * Sets a safe interval and keeps track of its ID for later cleanup.
    * This ensures that all intervals can be cleared easily when the game stops.
-   *
    * @param {Function} fn - The function to be executed repeatedly.
    * @param {number} time - The interval time in milliseconds.
    * @returns {number} The ID of the interval.
@@ -460,11 +257,9 @@ class World {
       this.backgroundMusic.pause();
       this.backgroundMusic.currentTime = 0;
     }
-
     if (this.allSounds) {
       this.allSounds.forEach((audio) => {
         if (audio === this.sounds?.win || audio === this.sounds?.lose) return;
-
         if (audio && !audio.paused) {
           audio.pause();
           audio.currentTime = 0;
@@ -576,18 +371,13 @@ class World {
   showRestartButton() {
     const btn = document.getElementById("restartBtn");
     btn.style.display = "block";
-
-    // Falls es schon einen Listener gibt, entfernen wir ihn
     if (this._restartHandler) {
       btn.removeEventListener("click", this._restartHandler);
     }
-
-    // Event Handler als Property speichern, damit removeEventListener funktioniert
     this._restartHandler = () => {
       btn.style.display = "none";
       restartGame();
     };
-
     btn.addEventListener("click", this._restartHandler);
   }
 }
