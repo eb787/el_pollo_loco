@@ -148,14 +148,10 @@ window.addEventListener("DOMContentLoaded", () => {
   isMuted = savedMute === "true";
   updateWorldSounds(isMuted);
   updateMuteIcons(isMuted);
-
   const muteBtn = document.getElementById("muteBtn");
   if (muteBtn) muteBtn.addEventListener("click", toggleMute);
-
   const muteBtnMobile = document.getElementById("muteBtn_mobile");
   if (muteBtnMobile) muteBtnMobile.addEventListener("click", toggleMute);
-
-  // ✅ Orientation check wird jetzt sicher nach DOM-Load ausgeführt
   checkOrientation();
   window.addEventListener("resize", checkOrientation);
   window.addEventListener("orientationchange", checkOrientation);

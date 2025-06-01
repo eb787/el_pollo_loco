@@ -78,13 +78,8 @@ class Chicken extends MovableObject {
         }
       }
       attempts++;
-    }
-    if (!isValid) {
-      console.warn(
-        "No valid position found for Chicken, using last known position."
-      );
-    }
-    return xPosition;
+    } if (!isValid) { console.warn( "No valid position found for Chicken, using last known position.");
+    } return xPosition;
   }
 
   /**

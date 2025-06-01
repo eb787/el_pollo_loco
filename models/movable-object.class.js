@@ -8,6 +8,7 @@ class MovableObject extends DrawableObject {
   lastHit = 0;
   lastHitBottle = 1000;
   hitCooldown = 300;
+  isFrozen = false;
   offset = {
     top: 5,
     left: 5,
@@ -48,17 +49,14 @@ class MovableObject extends DrawableObject {
    */
   isColliding(mo) {
     const buffer = 5;
-
     const a_left = this.x + this.offset.left - buffer;
     const a_right = this.x + this.width - this.offset.right + buffer;
     const a_top = this.y + this.offset.top - buffer;
     const a_bottom = this.y + this.height - this.offset.bottom + buffer;
-
     const b_left = mo.x + mo.offset.left - buffer;
     const b_right = mo.x + mo.width - mo.offset.right + buffer;
     const b_top = mo.y + mo.offset.top - buffer;
     const b_bottom = mo.y + mo.height - mo.offset.bottom + buffer;
-
     return (
       a_right > b_left &&
       a_bottom > b_top &&
@@ -99,6 +97,7 @@ class MovableObject extends DrawableObject {
    * @memberof MovableObject
    */
   hit() {
+    if (this.isFrozen) return; // Kein Schaden wenn eingefroren
     const now = new Date().getTime();
     if (now - this.lastHit > this.hitCooldown) {
       this.energy -= 5;
@@ -116,6 +115,7 @@ class MovableObject extends DrawableObject {
    * @memberof MovableObject
    */
   hitEndboss() {
+    if (this.isFrozen) return; // Kein Schaden wenn eingefroren
     this.energy -= 20;
     if (this.energy < 0) {
       this.energy = 0;

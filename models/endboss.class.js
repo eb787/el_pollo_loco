@@ -226,11 +226,9 @@ class Endboss extends MovableObject {
     if (walkingSound && walkingSound.paused) {
       walkingSound.loop = true;
       walkingSound.volume = this.AUDIOS.walking[1];
-
       if (this.world?.backgroundMusic && !this.world.backgroundMusic.paused) {
         this.world.backgroundMusic.pause();
       }
-
       walkingSound
         .play()
         .catch((e) => console.warn("Endboss walking sound blocked:", e));

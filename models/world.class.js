@@ -268,6 +268,10 @@ class World {
     }
   }
 
+  /**
+   * Initializes the character's sounds using the SoundHelper utility.
+   * - Stores the returned sounds object in this.sounds for later use.
+   */
   initSounds() {
     const newSounds = SoundHelper.initSounds(this.AUDIOS, false, (audio) =>
       SoundHelper.registerSound(audio, this.allSounds)
@@ -276,97 +280,105 @@ class World {
   }
 
   /**
-   * Continuously checks if the player has defeated the Endboss.
-   * Shows the win screen once the Endboss energy reaches zero.
+   * Continuously checks for a game end condition and shows the respective screen.
+   * Prevents multiple end states by checking isGameOver flag.
+   *
+   * @param {Function} conditionFn - Function that returns true when the condition to end the game is met.
+   * @param {Function} endScreenFn - Function to call when the condition is met (e.g., this.showWinScreen).
+   * @param {number} [delay=0] - Optional delay before showing the end screen.
    */
-  checkIfPlayerWon() {
-    let interval = setInterval(() => {
-      let endboss = this.level.enemies.find((e) => e instanceof Endboss);
-      if (endboss && endboss.energy <= 0) {
+  checkEndCondition(conditionFn, endScreenFn, delay = 0) {
+    const interval = setInterval(() => {
+      if (this.isGameOver) return;
+      if (conditionFn()) {
         clearInterval(interval);
-
+        this.character.isFrozen = true;
         setTimeout(() => {
-          this.showWinScreen();
-        }, 700);
+          this.isGameOver = true;
+          this.stopGame();
+          endScreenFn.call(this);
+        }, delay);
       }
     }, 200);
     this.intervalIds.push(interval);
   }
 
-  /**
-   * Continuously checks if the player has lost (energy <= 0).
-   * Shows the lose screen when the player is out of energy.
-   */
+  checkIfPlayerWon() {
+    this.checkEndCondition(
+      () => {
+        let endboss = this.level.enemies.find((e) => e instanceof Endboss);
+        return endboss && endboss.energy <= 0;
+      },
+      this.showWinScreen,
+      3000
+    );
+  }
+
   checkIfPlayerLost() {
-    let interval = setInterval(() => {
-      if (this.character.energy <= 0) {
-        clearInterval(interval);
-        this.showLoseScreen();
-      }
-    }, 200);
-    this.intervalIds.push(interval);
+    this.checkEndCondition(
+      () => this.character.energy <= 0,
+      this.showLoseScreen
+    );
   }
 
   /**
-   * Displays the win screen:
-   * - Stops background music
-   * - Plays win sound
-   * - Draws win image on canvas
-   * - Stops the game and shows restart button
+   * Stops the game, displays the end screen image, and shows the restart button.
+   * @param {string} imagePath - Path to the image to display.
    */
+  showEndScreenVisual(imagePath) {
+    if (this.backgroundMusic) {
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
+    }
+    let image = new Image();
+    image.src = imagePath;
+    image.onload = () => {
+      let ctx = this.ctx;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    };
+    this.stopGame();
+    this.showRestartButton();
+  }
+
+  /**
+   * Plays the end screen sound.
+   * @param {string} soundKey - Key of the sound to play ('win' or 'lose').
+   */
+  playEndScreenSound(soundKey) {
+    if (!this.isMuted && this.sounds?.[soundKey]) {
+      this.sounds[soundKey].currentTime = 0;
+      this.sounds[soundKey]
+        .play()
+        .catch((e) => console.warn(`${soundKey} sound blocked:`, e));
+    }
+  }
+
+  /**
+   * Combines sound and visual display for the end screen.
+   * @param {string} soundKey - Key of the sound to play ('win' or 'lose').
+   * @param {string} imagePath - Path to the image to display.
+   */
+  showEndScreen(soundKey, imagePath) {
+    if (this.isGameOver) {
+      this.isGameOver = true;
+    }
+    this.playEndScreenSound(soundKey);
+    this.showEndScreenVisual(imagePath);
+  }
+
   showWinScreen() {
-    if (this.backgroundMusic) {
-      this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0;
-    }
-    if (!this.isMuted && this.sounds?.win) {
-      this.sounds.win.currentTime = 0;
-      this.sounds.win
-        .play()
-        .catch((e) => console.warn("Win sound blocked:", e));
-    }
-    let winImage = new Image();
-    winImage.src = "img/You won, you lost/You won A.png";
-    winImage.onload = () => {
-      let ctx = this.ctx;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(winImage, 0, 0, canvas.width, canvas.height);
-    };
-    this.stopGame();
-    this.showRestartButton();
+    this.showEndScreen("win", "img/You won, you lost/You won A.png");
   }
 
-  /**
-   * Displays the lose screen:
-   * - Stops background music
-   * - Plays lose sound
-   * - Draws lose image on canvas
-   * - Stops the game and shows restart button
-   */
   showLoseScreen() {
-    if (this.backgroundMusic) {
-      this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0;
-    }
-    if (!this.isMuted && this.sounds?.lose) {
-      this.sounds.lose.currentTime = 0;
-      this.sounds.lose
-        .play()
-        .catch((e) => console.warn("Lose sound blocked:", e));
-    }
-    let loseImage = new Image();
-    loseImage.src = "img/You won, you lost/You lost.png";
-    loseImage.onload = () => {
-      let ctx = this.ctx;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(loseImage, 0, 0, canvas.width, canvas.height);
-    };
-    this.stopGame();
-    this.showRestartButton();
+    this.showEndScreen("lose", "img/You won, you lost/You lost.png");
   }
 
   /**
-   * Shows the restart button and reloads the page when clicked.
+   * Displays the restart button and sets up the click handler to restart the game.
+   * When clicked, the button hides itself and calls the restartGame() function.
+   * Ensures previous event listeners are removed to avoid duplicates.
    */
   showRestartButton() {
     const btn = document.getElementById("restartBtn");

@@ -151,13 +151,10 @@ class ThrowableObject extends MovableObject {
   startSplash() {
     this.broken = true;
     this.currentImage = 0;
-
     this.stopThrowSound();
     this.playSplashSound();
-
     this.intervalIds.forEach(clearInterval);
     this.intervalIds = [];
-
     const splashInterval = this.setSafeInterval(() => {
       if (this.currentImage < this.IMAGE_BOTTLE_SPLASH.length) {
         this.playAnimation(this.IMAGE_BOTTLE_SPLASH);

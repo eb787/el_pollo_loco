@@ -73,7 +73,7 @@ class Character extends MovableObject {
   lastThrowTime = 0;
   lastHurtSoundTime = 0;
   hurtSoundCooldown = 1000;
-  throwCooldown = 1000;
+  throwCooldown = 1300;
   lastWalkSoundTime = 0;
   walkSoundCooldown = 10;
   lastSnoreSoundTime = 0;
@@ -144,6 +144,7 @@ class Character extends MovableObject {
   startMovementLoop() {
     this.setSafeInterval(() => {
       if (this.world?.isGameOver) return;
+      if (this.isFrozen) return;
       if (this.world?.keyboard.RIGHT) this.moveRightHandler();
       if (this.world?.keyboard.LEFT) this.moveLeftHandler();
       if (this.world?.keyboard.SPACE) this.jumpHandler();
@@ -241,10 +242,12 @@ class Character extends MovableObject {
       if (this.isDead()) {
         this.handleDeadAnimation();
         return;
-      }if (this.isHurt()) {
+      }
+      if (this.isHurt()) {
         this.handleHurtAnimation();
         return;
-      } if (this.isAboveGround()) {
+      }
+      if (this.isAboveGround()) {
         this.handleJumpingAnimation();
       } else if (this.world?.keyboard?.RIGHT || this.world?.keyboard?.LEFT) {
         this.handleWalkingAnimation();
