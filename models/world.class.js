@@ -303,6 +303,11 @@ class World {
     this.intervalIds.push(interval);
   }
 
+  /**
+   * Checks if the player has won the game by evaluating the end condition.
+   * The win condition is met if the Endboss exists and its energy is less than or equal to 0.
+   * If the condition is met, the win screen is shown after a delay.
+   */
   checkIfPlayerWon() {
     this.checkEndCondition(
       () => {
@@ -310,10 +315,15 @@ class World {
         return endboss && endboss.energy <= 0;
       },
       this.showWinScreen,
-      3000
+      3000 // Delay in milliseconds before showing the win screen
     );
   }
 
+  /**
+   * Checks if the player has lost the game by evaluating the end condition.
+   * The lose condition is met if the character's energy is less than or equal to 0.
+   * If the condition is met, the lose screen is shown immediately.
+   */
   checkIfPlayerLost() {
     this.checkEndCondition(
       () => this.character.energy <= 0,
